@@ -790,6 +790,10 @@ select:focus {
         padding-top: var(--spacing-md);
     }
 
+    body.dark-mode .sidebar {
+        background-color: rgba(37, 36, 66, 0.98);
+    }
+
     /* Estado Colapsado en Móvil (Iconos) */
     .sidebar.collapsed {
         width: 70px; /* Un poco más estrecho en móvil */
