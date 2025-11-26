@@ -693,10 +693,26 @@ select:focus {
    ========================================= */
 .auth-body {
     display: flex;
+    flex-direction: column; /* Asegurar que se apilen verticalmente */
     justify-content: center;
     align-items: center;
     height: 100vh;
     background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); /* Fondo especial para login */
+}
+
+.auth-brand-outside {
+    font-size: 3.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: fadeInDown 0.5s ease-out;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .auth-container {
@@ -748,14 +764,6 @@ select:focus {
     font-size: 0.9rem;
     display: none;
     border: 1px solid var(--color-danger);
-}
-
-.auth-brand {
-    font-size: 2.5rem;
-    color: var(--color-primary);
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    letter-spacing: -1px;
 }
 
 .auth-container h2 {
