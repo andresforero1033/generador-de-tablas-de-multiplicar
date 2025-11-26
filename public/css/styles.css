@@ -512,60 +512,137 @@ select:focus {
     body {
         flex-direction: column;
         height: auto;
-        overflow: auto;
+        overflow-y: auto; /* Permitir scroll en el body */
     }
 
+    /* Sidebar Mobile: Barra de navegación horizontal */
     .sidebar {
         width: 100%;
-        padding: var(--spacing-xs);
+        height: auto;
+        padding: 10px 15px;
         flex-direction: row;
-        flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
         position: sticky;
         top: 0;
+        overflow-x: auto; /* Scroll horizontal */
+        white-space: nowrap;
+        background-color: rgba(255, 255, 255, 0.95);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--color-border);
+        border-right: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        z-index: 1000;
+    }
+
+    /* Ocultar scrollbar pero mantener funcionalidad */
+    .sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .sidebar header {
-        width: 100%;
-        display: none; /* Ahorrar espacio en móvil */
-    }
-
-    .sidebar header h2 {
-        margin: 0;
-        border: none;
-        text-align: left;
+        display: none; /* Ocultar header en móvil para ahorrar espacio */
     }
 
     .menu-item {
         width: auto;
-        padding: 8px 12px;
+        margin: 0 5px;
+        padding: 8px 16px;
         font-size: 0.9rem;
-        margin: 2px;
+        flex-shrink: 0;
+        border-radius: 20px; /* Forma de píldora */
+        background-color: transparent;
     }
 
+    .menu-item.active {
+        background-color: var(--color-primary);
+        color: white;
+        box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+    }
+
+    /* Submenús en móvil: Barra flotante debajo del nav */
     .submenu {
-        width: 100%;
-        order: 10; /* Mover submenús al final */
+        position: fixed;
+        top: 60px; /* Altura aprox del sidebar */
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        border-left: none;
+        margin: 0;
+        z-index: 999;
+    }
+    
+    /* Asegurar que se muestre como flex cuando no está oculto */
+    .submenu:not(.u-hidden) {
+        display: flex;
+        animation: slideDown 0.3s ease-out;
     }
 
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .submenu-item {
+        width: auto;
+        background-color: var(--color-bg-input);
+        border-radius: 15px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border: 1px solid var(--color-border);
+    }
+
+    .submenu-item:hover {
+        background-color: var(--color-primary);
+        color: white;
+    }
+
+    /* Contenido Principal Móvil */
     .main-content {
         padding: var(--spacing-sm);
+        width: 100%;
+        overflow-x: hidden;
     }
 
     .container {
-        margin-top: 0;
+        padding: var(--spacing-md);
+        margin-top: 10px;
+        width: 100%;
         box-shadow: none;
-        padding: var(--spacing-sm);
+        border: 1px solid var(--color-border);
     }
 
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Calculadora Móvil */
     .calculator-grid {
-        gap: 5px;
+        gap: 8px;
     }
 
     .calc-btn {
+        padding: 15px;
+        font-size: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    #calc-display {
+        font-size: 2.5rem;
         padding: 10px;
-        font-size: 1.1rem;
+    }
+
+    /* Login Móvil */
+    .auth-container {
+        padding: 2rem;
+        margin: 1rem;
+        width: 90%;
     }
 }
 
