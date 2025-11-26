@@ -43,6 +43,86 @@
 }
 
 /* =========================================
+   Dark Mode Theme
+   ========================================= */
+body.dark-mode {
+    --color-bg-body: #1e1e2e;
+    --color-bg-card: #2d2b55;
+    --color-bg-sidebar: #252442;
+    --color-bg-input: #3a3861;
+    --color-text-main: #e0e0e0;
+    --color-text-muted: #a0a0b0;
+    --color-text-light: #707080;
+    --color-border: #454370;
+    --color-primary: #a29bfe; /* Lighter for dark bg */
+    --color-primary-dark: #8c7ae6;
+    
+    background: linear-gradient(135deg, #13131f 0%, #2d2b55 100%);
+}
+
+body.dark-mode .sidebar {
+    box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .card {
+    border-color: var(--color-border);
+}
+
+body.dark-mode .ejemplo-box,
+body.dark-mode #procesos-division {
+    background-color: #2d2b55;
+    color: #fff;
+    border-color: var(--color-border);
+    background-image: 
+        linear-gradient(#454370 1px, transparent 1px), 
+        linear-gradient(90deg, #454370 1px, transparent 1px);
+}
+
+body.dark-mode .auth-container {
+    background: rgba(45, 43, 85, 0.95);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .auth-container h2 {
+    color: var(--color-text-light);
+}
+
+body.dark-mode .auth-brand-outside {
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: transparent;
+    border: 2px solid var(--color-border);
+    color: var(--color-text-main);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    margin: 0 auto var(--spacing-sm);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--color-bg-input);
+    transform: rotate(15deg);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.theme-toggle-absolute {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* =========================================
    Reset & Base
    ========================================= */
 * {
@@ -53,11 +133,20 @@ body {
     font-family: var(--font-main);
     margin: 0;
     display: flex;
-    height: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
     /* Fondo con degradado suave */
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     color: var(--color-text-main);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.app-container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    position: relative;
 }
 
 /* =========================================
@@ -71,9 +160,85 @@ body {
     flex-direction: column;
     padding: var(--spacing-md);
     box-shadow: 4px 0 15px rgba(0,0,0,0.03);
-    overflow-y: auto;
     z-index: 100;
     border-right: 1px solid rgba(0,0,0,0.05);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+    flex-shrink: 0;
+    min-height: 100%;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+    padding: var(--spacing-md) var(--spacing-xs);
+    align-items: center;
+}
+
+.sidebar.hidden {
+    width: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.desktop-toggle-btn {
+    position: absolute;
+    left: 280px; /* Match sidebar width */
+    top: 28px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 110;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    color: var(--color-text-muted);
+    transform: translateX(-50%); /* Center on the line */
+}
+
+.desktop-toggle-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.sidebar.collapsed + .desktop-toggle-btn {
+    left: 80px;
+}
+
+.sidebar.hidden + .desktop-toggle-btn {
+    left: 20px;
+}
+
+.sidebar.collapsed + .desktop-toggle-btn svg {
+    transform: rotate(0deg); /* Point Left (Keep collapsing) */
+}
+
+.sidebar.hidden + .desktop-toggle-btn svg {
+    transform: rotate(180deg); /* Point Right (Expand) */
+}
+
+@media (min-width: 769px) {
+    .desktop-toggle-btn {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop-toggle-btn {
+        display: none;
+    }
+}
+
+.sidebar header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .sidebar header h2 {
@@ -85,6 +250,20 @@ body {
     color: var(--color-primary);
     border-bottom: 2px solid var(--color-bg-input);
     padding-bottom: var(--spacing-sm);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.sidebar.collapsed header h2 {
+    font-size: 1.2rem;
+    border-bottom: none;
+    margin-bottom: var(--spacing-sm);
+}
+
+.sidebar.collapsed .brand-text {
+    display: none;
 }
 
 /* Menú Items */
@@ -103,6 +282,46 @@ body {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+    margin-right: 12px;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+}
+
+.menu-text {
+    transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .menu-text {
+    display: none;
+}
+
+.sidebar.collapsed .menu-item {
+    justify-content: center;
+    padding: 14px 0;
+}
+
+.sidebar.collapsed .menu-icon {
+    margin-right: 0;
+    font-size: 1.4rem;
+}
+
+.sidebar.collapsed .logout-btn .menu-text {
+    display: none;
+}
+
+.sidebar.collapsed .logout-btn {
+    padding: 10px 0;
+}
+
+.sidebar.collapsed .submenu {
+    display: none !important;
 }
 
 .menu-item:hover {
@@ -148,14 +367,26 @@ body {
 /* =========================================
    Layout: Main Content
    ========================================= */
+/* content-wrapper removed, replaced by app-container in HTML/Body */
+
+.main-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+    position: relative;
+    width: 100%;
+}
+
 .main-content {
     flex: 1;
     padding: var(--spacing-lg);
-    overflow-y: auto;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     position: relative;
+    width: 100%;
 }
 
 .container {
@@ -168,6 +399,8 @@ body {
     max-width: 600px;
     margin-top: var(--spacing-sm);
     animation: fadeIn 0.3s ease-in-out;
+    /* Ensure container doesn't overflow horizontally */
+    max-width: 800px; /* Increased slightly for better layout */
 }
 
 @keyframes fadeIn {
@@ -179,6 +412,16 @@ h1 {
     color: var(--color-text-main);
     font-size: 1.8rem;
     margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-muted);
+}
+
+.section-title-mt {
+    margin-top: 2rem;
 }
 
 /* =========================================
@@ -278,7 +521,8 @@ select:focus {
     color: var(--color-danger);
     cursor: pointer;
     font-size: 0.9rem;
-    margin-top: auto; /* Empujar al fondo si hay espacio */
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-md); /* Espacio extra abajo */
     display: block;
     width: 100%;
     text-align: center;
@@ -693,11 +937,22 @@ select:focus {
    ========================================= */
 .auth-body {
     display: flex;
-    flex-direction: column; /* Asegurar que se apilen verticalmente */
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+    height: auto; /* Allow growth */
+    overflow-y: auto;
+}
+
+.auth-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); /* Fondo especial para login */
+    padding: 2rem;
+    width: 100%;
+    min-height: 100vh; /* Force wrapper to take at least full viewport height */
 }
 
 .auth-brand-outside {
@@ -770,5 +1025,125 @@ select:focus {
     color: var(--color-text-muted);
     font-size: 1.2rem;
     font-weight: 400;
+    margin-top: 0;
+}
+
+/* =========================================
+   Footer
+   ========================================= */
+.site-footer {
+    background-color: var(--color-bg-sidebar);
+    color: var(--color-text-muted);
+    padding: 3rem 2rem 1rem;
+    margin-top: auto;
+    border-top: 1px solid var(--color-border);
+    width: 100%;
+    z-index: 10;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-section h3 {
+    color: var(--color-primary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-section p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+    color: var(--color-primary);
+}
+
+.social-icons {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-icons a {
+    color: var(--color-text-muted);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-bg-input);
+}
+
+.social-icons a:hover {
+    color: white;
+    background-color: var(--color-primary);
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+
+/* =========================================
+   Nuevas Secciones (Sobre Nosotros, Servicios, etc)
+   ========================================= */
+.info-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.legal-content {
+    text-align: left;
+    padding: 1rem;
+}
+
+.icon-large {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.text-primary { color: var(--color-primary); }
+.text-accent { color: var(--color-accent); }
+.text-info { color: var(--color-info); }
+
+.legal-content h3 {
+    color: var(--color-primary);
+    margin-top: 2rem;
+}
+.legal-content h3:first-of-type {
     margin-top: 0;
 }

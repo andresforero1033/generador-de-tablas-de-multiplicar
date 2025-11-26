@@ -5,6 +5,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Detener ejecución si redirigimos
     }
 
+    // Theme Logic
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (themeBtn) themeBtn.textContent = '☀️';
+    }
+
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            themeBtn.textContent = isDark ? '☀️' : '🌙';
+        });
+    }
+
     const authForm = document.getElementById('auth-form');
     const formTitle = document.getElementById('form-title');
     const toggleAuth = document.getElementById('toggle-auth');

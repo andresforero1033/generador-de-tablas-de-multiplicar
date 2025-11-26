@@ -42,7 +42,13 @@ const DOM = {
         general: $('controles-generales'),
         calculadora: $('calculadora-container'),
         aprendizaje: $('aprendizaje-menu'),
+        temasDivision: $('temas-division'),
+        temasMultiplicacion: $('temas-multiplicacion'), // Nuevo contenedor
         explicacion: $('explicacion-container'),
+        sobreNosotros: $('sobre-nosotros-container'),
+        servicios: $('servicios-container'),
+        blog: $('blog-container'),
+        legal: $('legal-container'),
         resultado: $('resultado-container'), // Contenedor padre
         resultadoContent: $('resultado'),
         procesos: $('procesos-container'),
@@ -303,6 +309,40 @@ const UI = {
         UI.toggleElement(DOM.containers.procesos, false);
     },
 
+    showDivisionTopics: () => {
+        UI.resetViews();
+        UI.toggleElement(DOM.containers.temasDivision, true);
+        DOM.text.titulo.textContent = 'Niveles de División';
+    },
+
+    showMultiplicationTopics: () => {
+        UI.resetViews();
+        UI.toggleElement(DOM.containers.temasMultiplicacion, true);
+        DOM.text.titulo.textContent = 'Niveles de Multiplicación';
+    },
+
+    backToLevels: () => {
+        // Determinar a qué menú de niveles volver basado en el contenido actual
+        // O simplemente volver al menú principal si es ambiguo, pero intentaremos ser listos
+        // Por simplicidad, usaremos una variable de estado temporal o inferencia
+        // Mejor aún: ocultamos la explicación y mostramos el menú correspondiente
+        
+        // Como no guardamos el contexto previo, una solución simple es:
+        // Si el título de la explicación contiene "División", volvemos a división
+        // Si contiene "Multiplicación", volvemos a multiplicación
+        
+        const titulo = DOM.text.explicacionTitulo.textContent;
+        UI.toggleElement(DOM.containers.explicacion, false);
+        
+        if (titulo.includes('División')) {
+            UI.toggleElement(DOM.containers.temasDivision, true);
+            DOM.text.titulo.textContent = 'Niveles de División';
+        } else {
+            UI.toggleElement(DOM.containers.temasMultiplicacion, true);
+            DOM.text.titulo.textContent = 'Niveles de Multiplicación';
+        }
+    },
+
     updateActiveMenu: (mode) => {
         Object.values(DOM.menus).forEach(btn => btn.classList.remove('active'));
         
@@ -371,6 +411,22 @@ const UI = {
                 DOM.text.titulo.textContent = 'Materiales de Aprendizaje';
                 UI.toggleElement(DOM.containers.aprendizaje, true);
                 break;
+            case 'sobre-nosotros':
+                DOM.text.titulo.textContent = 'Sobre Nosotros';
+                UI.toggleElement(DOM.containers.sobreNosotros, true);
+                break;
+            case 'servicios':
+                DOM.text.titulo.textContent = 'Nuestros Servicios';
+                UI.toggleElement(DOM.containers.servicios, true);
+                break;
+            case 'blog':
+                DOM.text.titulo.textContent = 'Blog Educativo';
+                UI.toggleElement(DOM.containers.blog, true);
+                break;
+            case 'legal':
+                DOM.text.titulo.textContent = 'Información Legal';
+                UI.toggleElement(DOM.containers.legal, true);
+                break;
         }
     },
 
@@ -379,6 +435,8 @@ const UI = {
         if (!data) return;
 
         UI.toggleElement(DOM.containers.aprendizaje, false);
+        UI.toggleElement(DOM.containers.temasDivision, false);
+        UI.toggleElement(DOM.containers.temasMultiplicacion, false); // Ocultar también este
         UI.toggleElement(DOM.containers.explicacion, true);
         
         DOM.text.explicacionTitulo.textContent = data.titulo;
@@ -431,44 +489,209 @@ const EXPLICACIONES = {
         `
     },
     'm1': {
-        titulo: "Multiplicación Nivel 1",
+        titulo: "Multiplicación por 1 Cifra: El Inicio",
         contenido: `
-            <div class="explicacion-step"><h4>Multiplicación Básica</h4><p>Practica las tablas básicas. 4 x 3 = 12.</p></div>
+            <div class="explicacion-step">
+                <h4>✨ ¡Magia con Números!</h4>
+                <p>Aprender a multiplicar es como aprender un truco de magia. Si practicas un poco cada día, verás que es muy fácil.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✳️ Paso a Paso</h4>
+                <p>Cuando multiplicas por 1 cifra, solo debes seguir un renglón de operaciones.</p>
+                <p><strong>✏️ Ejemplo: 243 × 5</strong></p>
+                <ul>
+                    <li>Multiplicamos 3 × 5 = 15 → escribimos 5 y llevamos 1.</li>
+                    <li>Multiplicamos 4 × 5 = 20, más 1 que llevamos → 21 → escribimos 1 y llevamos 2.</li>
+                    <li>Multiplicamos 2 × 5 = 10, más 2 → 12.</li>
+                </ul>
+                <p class="math-example">Resultado: 1 2 1 5</p>
+                <p><strong>⭐ Truco:</strong> Empieza siempre por la cifra de la derecha.</p>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaMultiplicacion(1)">Practicar Nivel 1</button></div>
         `
     },
     'm2': {
-        titulo: "Multiplicación Nivel 2",
+        titulo: "Multiplicación por 2 Cifras: Doble Renglón",
         contenido: `
-            <div class="explicacion-step"><h4>Multiplicación por 1 Cifra (Llevando)</h4><p>Multiplica unidades, luego decenas y suma lo que llevas.</p></div>
+            <div class="explicacion-step">
+                <h4>✳️ Dos Renglones</h4>
+                <p>Aquí se hacen dos renglones. Cada cifra de abajo multiplica a todas las de arriba.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 243 × 25</h4>
+                <p>1. Primero multiplicamos por el 5 (derecha): <strong>243 × 5 = 1215</strong></p>
+                <p>2. Ahora multiplicamos por el 2, pero ojo: Ese 2 vale 20, así que agregamos un cero al final.</p>
+                <p><strong>243 × 2 = 486 → escribimos 4860</strong></p>
+                <p>3. Sumamos los dos renglones:</p>
+                <pre style="background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; font-family: monospace;">
+  1215
++ 4860
+------
+  6075</pre>
+                <p><strong>⭐ Truco:</strong> Cada cifra que avanzas a la izquierda, agrega un cero.</p>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaMultiplicacion(2)">Practicar Nivel 2</button></div>
         `
     },
     'm3': {
-        titulo: "Multiplicación Nivel 3",
+        titulo: "Multiplicación por 3 Cifras: Nivel Experto",
         contenido: `
-            <div class="explicacion-step"><h4>Multiplicación por 2 Cifras</h4><p>Multiplica por la unidad, luego por la decena (dejando espacio) y suma.</p></div>
+            <div class="explicacion-step">
+                <h4>✳️ Tres Renglones</h4>
+                <p>Es igual que la de 2 cifras, pero ahora hacemos tres renglones.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 132 × 234</h4>
+                <p>Multiplicamos con cada cifra del 234 empezando desde la derecha:</p>
+                <ul>
+                    <li><strong>x4:</strong> 132 × 4 = 528</li>
+                    <li><strong>x3:</strong> 132 × 3 = 396 → agregamos un cero → <strong>3960</strong></li>
+                    <li><strong>x2:</strong> 132 × 2 = 264 → agregamos dos ceros → <strong>26400</strong></li>
+                </ul>
+                <p>Luego sumamos todo:</p>
+                <pre style="background: rgba(0,0,0,0.1); padding: 10px; border-radius: 8px; font-family: monospace;">
+    528
+   3960
++ 26400
+-------
+  30888</pre>
+            </div>
+            <div class="explicacion-step">
+                <h4>🎯 Consejos para aprender más rápido</h4>
+                <ul>
+                    <li>Practica con números pequeños primero.</li>
+                    <li>Usa colores para marcar lo que llevas.</li>
+                    <li>Revisa tus resultados con una calculadora.</li>
+                    <li>¡No te preocupes por equivocarte, todos los genios practican mucho!</li>
+                </ul>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaMultiplicacion(3)">Practicar Nivel 3</button></div>
         `
     },
-    1: {
-        titulo: "División por 1 Cifra",
+    'm4': {
+        titulo: "Multiplicación con Decimales: Nivel Maestro",
         contenido: `
-            <div class="explicacion-step"><h4>Pasos Básicos</h4><p>1. Tomar cifras. 2. Buscar número. 3. Multiplicar y Restar. 4. Bajar siguiente cifra.</p></div>
+            <div class="explicacion-step">
+                <h4>✨ El Secreto de la Coma</h4>
+                <p>Multiplicar con decimales es igual que con enteros. ¡El único truco es saber dónde poner la coma al final!</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✳️ Pasos Mágicos</h4>
+                <ol>
+                    <li><strong>Olvida la coma:</strong> Multiplica los números como si fueran enteros normales.</li>
+                    <li><strong>Cuenta los decimales:</strong> Cuenta cuántos números hay detrás de la coma en total (entre los dos números).</li>
+                    <li><strong>Pon la coma:</strong> En el resultado, cuenta espacios desde la derecha y pon la coma.</li>
+                </ol>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 3.12 × 2.5</h4>
+                <p>1. Multiplicamos sin comas: <strong>312 × 25 = 7800</strong></p>
+                <p>2. Contamos decimales:</p>
+                <ul>
+                    <li>3.<strong>12</strong> (tiene 2 decimales)</li>
+                    <li>2.<strong>5</strong> (tiene 1 decimal)</li>
+                    <li>Total: <strong>3 decimales</strong></li>
+                </ul>
+                <p>3. Ponemos la coma en el 7800 contando 3 lugares desde la derecha:</p>
+                <p class="math-example">7 . 8 0 0</p>
+                <p><strong>Resultado: 7.8</strong></p>
+            </div>
+        `
+    },
+    1: {
+        titulo: "División por 1 Cifra: Repartiendo Dulces",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>✨ ¿Qué es dividir?</h4>
+                <p>La división es como repartir. Si sabes repartir dulces entre amigos, ¡sabes dividir!</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✳️ Paso a Paso</h4>
+                <p>Vamos repartiendo número por número, de izquierda a derecha.</p>
+                <p><strong>✏️ Ejemplo: 648 ÷ 3</strong></p>
+                <ol>
+                    <li><strong>6 ÷ 3:</strong> Cabe 2 veces. (2 × 3 = 6). Restamos y queda 0.</li>
+                    <li><strong>Bajar el 4:</strong> Ahora dividimos 4 ÷ 3. Cabe 1 vez. (1 × 3 = 3). Restamos y queda 1.</li>
+                    <li><strong>Bajar el 8:</strong> Se forma el 18. Dividimos 18 ÷ 3. Cabe 6 veces. (6 × 3 = 18). Restamos y queda 0.</li>
+                </ol>
+                <p class="math-example">Resultado: 216</p>
+                <p><strong>⭐ Truco:</strong> Cada número que bajas forma un “número nuevo” para seguir dividiendo.</p>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaDivision(1)">Practicar Nivel 1</button></div>
         `
     },
     2: {
-        titulo: "División por 2 Cifras",
+        titulo: "División por 2 Cifras: Pensando en Grande",
         contenido: `
-            <div class="explicacion-step"><h4>Estimación</h4><p>Tapa las unidades para estimar cuántas veces cabe el divisor.</p></div>
+            <div class="explicacion-step">
+                <h4>✳️ El Reto de las 2 Cifras</h4>
+                <p>Usamos el mismo proceso, pero pensamos un poquito más porque el divisor tiene dos números.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 1872 ÷ 24</h4>
+                <p>1. Miramos los primeros números. ¿Cabe 24 en 18? No. Tomamos <strong>187</strong>.</p>
+                <p>2. ¿Cuántas veces cabe 24 en 187? Probamos:</p>
+                <ul>
+                    <li>24 × 8 = 192 (Se pasa)</li>
+                    <li>24 × 7 = 168 (¡Perfecto!)</li>
+                </ul>
+                <p>3. Ponemos 7 y restamos: 187 - 168 = 19.</p>
+                <p>4. Bajamos el 2. Ahora tenemos <strong>192</strong>.</p>
+                <p>5. ¿Cabe 24 en 192? ¡Sí, 8 veces exactas!</p>
+                <p class="math-example">Resultado: 78</p>
+                <p><strong>⭐ Truco:</strong> Prueba multiplicar el divisor por 4, 5, 6... hasta encontrar el que más se acerque.</p>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaDivision(2)">Practicar Nivel 2</button></div>
         `
     },
     3: {
-        titulo: "División por 3 Cifras",
+        titulo: "División con Resto: Cuando Sobra Algo",
         contenido: `
-            <div class="explicacion-step"><h4>División Grande</h4><p>Tapa dos cifras para estimar. Requiere paciencia y orden.</p></div>
+            <div class="explicacion-step">
+                <h4>✳️ No siempre es exacto</h4>
+                <p>A veces la división no da exacta, y queda un número sobrante llamado "Resto".</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 50 ÷ 6</h4>
+                <p>Buscamos en la tabla del 6:</p>
+                <ul>
+                    <li>6 × 8 = 48 (Cerca)</li>
+                    <li>6 × 9 = 54 (Se pasa)</li>
+                </ul>
+                <p>Elegimos el 8.</p>
+                <p>Restamos: 50 - 48 = <strong>2</strong></p>
+                <p class="math-example">Resultado: 8 y sobra 2</p>
+                <p>También se escribe: <strong>8 R 2</strong></p>
+                <p><strong>⭐ Truco:</strong> El resto siempre debe ser menor que el divisor.</p>
+            </div>
+            <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaDivision(1)">Practicar (Intenta que sobre)</button></div>
+        `
+    },
+    4: {
+        titulo: "División Larga: Paso a Paso",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>✳️ Proceso Repetitivo</h4>
+                <p>Cuando el número es grande, hacemos el mismo proceso una y otra vez: Dividir, Multiplicar, Restar, Bajar.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>✏️ Ejemplo: 4368 ÷ 12</h4>
+                <ol>
+                    <li><strong>43 ÷ 12:</strong> Cabe 3 veces (36). Sobran 7.</li>
+                    <li><strong>Bajar 6 (76):</strong> Cabe 6 veces (72). Sobran 4.</li>
+                    <li><strong>Bajar 8 (48):</strong> Cabe 4 veces (48). Sobra 0.</li>
+                </ol>
+                <p class="math-example">Resultado: 364</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>🎯 Consejos para aprender más rápido</h4>
+                <ul>
+                    <li>Divide despacio y por pasos.</li>
+                    <li>Si te confundes, vuelve al número anterior.</li>
+                    <li>Practica multiplicación: ¡ayuda muchísimo!</li>
+                    <li>Cuando no sepas, prueba multiplicando hasta acercarte.</li>
+                </ul>
+            </div>
             <div style="margin-top: 2rem; text-align: center;"><button class="action-btn" onclick="irAPracticaDivision(3)">Practicar Nivel 3</button></div>
         `
     }
@@ -482,12 +705,44 @@ const App = {
         // Event Listeners Globales
         document.addEventListener('keydown', App.handleKeydown);
         
+        // Theme Toggle Logic
+        const themeBtn = $('theme-toggle');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', App.toggleTheme);
+        }
+
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            if (themeBtn) themeBtn.textContent = '☀️';
+        }
+
         // Mobile Menu Toggle
         if (DOM.buttons.mobileMenu) {
             DOM.buttons.mobileMenu.addEventListener('click', () => {
                 const sidebar = $('sidebar');
                 sidebar.classList.toggle('active');
                 DOM.buttons.mobileMenu.classList.toggle('open');
+            });
+        }
+
+        // Desktop Sidebar Toggle
+        const desktopToggleBtn = $('desktop-sidebar-toggle');
+        if (desktopToggleBtn) {
+            desktopToggleBtn.addEventListener('click', () => {
+                const sidebar = $('sidebar');
+                
+                // Cycle: Expanded -> Collapsed -> Hidden -> Expanded
+                if (sidebar.classList.contains('hidden')) {
+                    sidebar.classList.remove('hidden');
+                    sidebar.classList.remove('collapsed'); // Reset to full expanded
+                } else if (sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('hidden');
+                } else {
+                    sidebar.classList.add('collapsed');
+                }
             });
         }
 
@@ -516,6 +771,15 @@ const App = {
         } else if (state.mode === 'multiplicar' && e.key === 'Enter') {
             if (document.activeElement === DOM.inputs.numero) App.generate();
         }
+    },
+
+    toggleTheme: () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        
+        const themeBtn = $('theme-toggle');
+        if (themeBtn) themeBtn.textContent = isDark ? '☀️' : '🌙';
     },
 
     changeDifficulty: (type, level) => {
@@ -611,9 +875,20 @@ window.mostrarProcesos = UI.showProcesses;
 window.mostrarExplicacion = UI.showExplanation;
 window.irAPracticaDivision = (n) => App.goToPractice('division', n);
 window.irAPracticaMultiplicacion = (n) => App.goToPractice('multiplication', n);
+window.mostrarTemasDivision = UI.showDivisionTopics;
+window.mostrarTemasMultiplicacion = UI.showMultiplicationTopics; // Nueva función global
+window.volverANiveles = UI.backToLevels; // Nueva función global
 
 // Bridge Calculadora
 window.calcNumero = (n) => Calculator.inputNumber(n);
 window.calcOperador = (op) => Calculator.inputOperator(op);
 window.calcIgual = () => Calculator.equals();
 window.calcClear = () => Calculator.clear();
+
+window.logout = () => {
+    if(confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        window.location.href = '/';
+    }
+};

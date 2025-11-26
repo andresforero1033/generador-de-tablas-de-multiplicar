@@ -1,38 +1,50 @@
-# 🧮 Generador de Tablas de Multiplicar y Divisiones
+# ✨ Creative - Plataforma Educativa de Matemáticas
 
-Una aplicación web educativa Full Stack diseñada para ayudar a estudiantes a practicar matemáticas de manera interactiva y divertida.
+**Creative** es una aplicación web educativa Full Stack diseñada para transformar el aprendizaje de las matemáticas en una experiencia interactiva, moderna y divertida. Enfocada en estudiantes de primaria y secundaria, ofrece herramientas para dominar la multiplicación y la división.
 
 ![Estado del Proyecto](https://img.shields.io/badge/Estado-En_Desarrollo-green)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-blue)
 
-## ✨ Características
+## ✨ Características Principales
 
-*   **Tablas de Multiplicar:** Genera tablas del 1 al 10 de cualquier número.
+### 🎨 Experiencia de Usuario (UI/UX)
+*   **Diseño 'Modern Playful':** Interfaz limpia con Glassmorphism, animaciones suaves y una paleta de colores vibrante.
+*   **Navegación Flexible:** Menú lateral inteligente que permite tres estados: expandido, colapsado (solo iconos) y totalmente oculto para maximizar el área de trabajo.
+*   **🌙 Modo Oscuro:** Soporte nativo para tema oscuro, ideal para reducir la fatiga visual.
+*   **Diseño Responsivo:** Adaptable a cualquier dispositivo (Móvil, Tablet, Escritorio).
+*   **Footer Dinámico:** Información de contacto, servicios y legal accesible al final del contenido.
+
+### 🧮 Herramientas Educativas
+*   **Tablas de Multiplicar:** Generador instantáneo de tablas del 1 al 10.
 *   **Generador de Ejercicios:**
-    *   Multiplicaciones por niveles (1, 2 y 3 cifras).
-    *   Divisiones por niveles (1, 2 y 3 cifras).
-*   **Visualización de Procesos:** Muestra paso a paso cómo resolver las operaciones (estilo "papel y lápiz").
-*   **Calculadora Integrada:** Herramienta básica para verificaciones rápidas.
-*   **Material de Aprendizaje:** Explicaciones teóricas sobre métodos de división y multiplicación.
-*   **Sistema de Usuarios:** Registro e inicio de sesión seguro para proteger el acceso.
-*   **Diseño Responsivo:** Interfaz moderna y amigable que funciona en PC, Tablets y Celulares.
+    *   **Multiplicación:** Niveles progresivos (1, 2, 3 cifras).
+    *   **División:** Niveles progresivos (1, 2, 3 cifras).
+*   **Visualización de Procesos:** Muestra el paso a paso de las operaciones ("Show your work"), simulando el proceso en papel.
+*   **Calculadora Integrada:** Para verificaciones rápidas sin salir de la app.
+
+### 📚 Material de Aprendizaje
+*   **Multiplicación:** Guías interactivas desde conceptos básicos hasta multiplicación con decimales (Nivel 4).
+*   **División:** Explicaciones detalladas desde repartos simples hasta división larga y con resto (Nivel 4).
+
+### 🔐 Seguridad y Gestión
+*   **Autenticación Segura:** Sistema de Registro y Login protegido con JWT.
+*   **Protección de Rutas:** Acceso restringido a las herramientas educativas solo para usuarios autenticados.
 
 ## 🛠️ Tecnologías Utilizadas (MERN Stack)
 
 *   **Frontend:**
-    *   HTML5, CSS3 (Diseño Moderno & Responsive).
+    *   HTML5 Semántico.
+    *   CSS3 (Variables, Flexbox, Grid, Animaciones).
     *   JavaScript (Vanilla ES6+).
 *   **Backend:**
     *   Node.js.
     *   Express.js.
 *   **Base de Datos:**
-    *   MongoDB Atlas (Nube).
+    *   MongoDB Atlas (Cloud).
     *   Mongoose (ODM).
 *   **Seguridad:**
-    *   JWT (JSON Web Tokens) para autenticación.
-    *   Bcryptjs para encriptación de contraseñas.
-*   **Despliegue:**
-    *   Render (Web Service).
+    *   JWT (JSON Web Tokens).
+    *   Bcryptjs (Hashing de contraseñas).
 
 ## 🚀 Instalación y Ejecución Local
 
@@ -48,7 +60,7 @@ Una aplicación web educativa Full Stack diseñada para ayudar a estudiantes a p
     ```
 
 3.  **Configurar variables de entorno:**
-    Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
+    Crea un archivo `.env` en la raíz del proyecto:
     ```env
     PORT=3000
     MONGODB_URI=tu_cadena_de_conexion_mongodb
@@ -62,13 +74,6 @@ Una aplicación web educativa Full Stack diseñada para ayudar a estudiantes a p
 
 5.  **Acceder a la aplicación:**
     Abre tu navegador en `http://localhost:3000`.
-
-## 🌐 Despliegue
-
-El proyecto está configurado para desplegarse automáticamente en **Render**.
-1.  Conecta tu repositorio de GitHub a Render.
-2.  Configura las variables de entorno en el panel de Render (`MONGODB_URI`, `JWT_SECRET`, `PORT`).
-3.  El comando de construcción es `npm install` y el de inicio es `node server.js`.
 
 ## 🤝 Contribución
 

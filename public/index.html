@@ -12,11 +12,6 @@
         if (!localStorage.getItem('token')) {
             window.location.href = '/';
         }
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            window.location.href = '/';
-        }
     </script>
 </head>
 <body>
@@ -27,110 +22,295 @@
         <span class="bar"></span>
     </button>
 
-    <nav class="sidebar" id="sidebar" aria-label="Menú principal">
-        <header>
-            <h2>✨ Creative</h2>
-            <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
-        </header>
-        <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">✖️ Tablas de Multiplicar</button>
-        
-        <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">📝 Generador de Multiplicaciones</button>
-        <div id="submenu-multiplicar-gen" class="submenu u-hidden" role="group" aria-label="Niveles de multiplicación">
-            <button class="submenu-item" onclick="cambiarDificultadMulti(1)">Nivel 1 (1 Cifra)</button>
-            <button class="submenu-item" onclick="cambiarDificultadMulti(2)">Nivel 2 (2 Cifras)</button>
-            <button class="submenu-item" onclick="cambiarDificultadMulti(3)">Nivel 3 (3 Cifras)</button>
-        </div>
-
-        <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">➗ Generador de Divisiones</button>
-        <div id="submenu-dividir" class="submenu u-hidden" role="group" aria-label="Niveles de división">
-            <button class="submenu-item" onclick="cambiarDificultad(1)">Nivel 1 (1 Cifra)</button>
-            <button class="submenu-item" onclick="cambiarDificultad(2)">Nivel 2 (2 Cifras)</button>
-            <button class="submenu-item" onclick="cambiarDificultad(3)">Nivel 3 (3 Cifras)</button>
-        </div>
-
-        <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">📱 Calculadora</button>
-        <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">📚 Materiales de Aprendizaje</button>
-    </nav>
-
-    <main class="main-content">
-        <section class="container" aria-labelledby="titulo">
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar" aria-label="Menú principal">
             <header>
-                <h1 id="titulo">Tablas de Multiplicar</h1>
+                <h2 class="brand-title">✨ <span class="brand-text">Creative</span></h2>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar Tema">🌙</button>
+                <button onclick="logout()" class="logout-btn">
+                    <span class="menu-icon">🚪</span>
+                    <span class="menu-text">Cerrar Sesión</span>
+                </button>
             </header>
             
-            <!-- Controles Generales -->
-            <section id="controles-generales" aria-label="Controles de la herramienta">
-                <label for="numeroInput" class="sr-only">Ingresa un número</label>
-                <input type="number" id="numeroInput" placeholder="Ingresa un número" aria-label="Número para generar tabla" />
-                
-                <button id="btn-generar" class="action-btn" onclick="generar()">Generar Tabla</button>
-                <button id="btn-explicacion" class="action-btn btn-info" onclick="irAExplicacion()">Ver Explicación del Tema</button>
-            </section>
+            <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">
+                <span class="menu-icon">✖️</span>
+                <span class="menu-text">Tablas de Multiplicar</span>
+            </button>
             
-            <section id="resultado-container" aria-live="polite">
-                <div id="resultado"></div>
-                <div id="procesos-container" class="u-hidden">
-                    <button id="btn-ver-procesos" class="action-btn btn-success" onclick="mostrarProcesos()">Ver Procesos</button>
-                    <div id="procesos-division" class="ejemplo-box u-hidden" tabindex="0"></div>
-                </div>
-            </section>
+            <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">Generador de Multiplicaciones</span>
+            </button>
+            <div id="submenu-multiplicar-gen" class="submenu u-hidden" role="group" aria-label="Niveles de multiplicación">
+                <button class="submenu-item" onclick="cambiarDificultadMulti(1)">Nivel 1 (1 Cifra)</button>
+                <button class="submenu-item" onclick="cambiarDificultadMulti(2)">Nivel 2 (2 Cifras)</button>
+                <button class="submenu-item" onclick="cambiarDificultadMulti(3)">Nivel 3 (3 Cifras)</button>
+            </div>
 
-            <!-- Calculadora -->
-            <section id="calculadora-container" class="u-hidden" aria-label="Calculadora básica">
-                <label for="calc-display" class="sr-only">Pantalla de la calculadora</label>
-                <input type="text" id="calc-display" readonly value="0" aria-live="polite">
-                <div class="calculator-grid">
-                    <button class="calc-btn clear" onclick="calcClear()" aria-label="Borrar">C</button>
-                    <button class="calc-btn operator" onclick="calcOperador('/')" aria-label="Dividir">/</button>
-                    <button class="calc-btn operator" onclick="calcOperador('*')" aria-label="Multiplicar">×</button>
-                    
-                    <button class="calc-btn" onclick="calcNumero(7)">7</button>
-                    <button class="calc-btn" onclick="calcNumero(8)">8</button>
-                    <button class="calc-btn" onclick="calcNumero(9)">9</button>
-                    <button class="calc-btn operator" onclick="calcOperador('-')" aria-label="Restar">-</button>
-                    
-                    <button class="calc-btn" onclick="calcNumero(4)">4</button>
-                    <button class="calc-btn" onclick="calcNumero(5)">5</button>
-                    <button class="calc-btn" onclick="calcNumero(6)">6</button>
-                    <button class="calc-btn operator" onclick="calcOperador('+')" aria-label="Sumar">+</button>
-                    
-                    <button class="calc-btn" onclick="calcNumero(1)">1</button>
-                    <button class="calc-btn" onclick="calcNumero(2)">2</button>
-                    <button class="calc-btn" onclick="calcNumero(3)">3</button>
-                    <button class="calc-btn equal" onclick="calcIgual()" aria-label="Igual">=</button>
-                    
-                    <button class="calc-btn calc-btn--span-2" onclick="calcNumero(0)">0</button>
-                    <button class="calc-btn" onclick="calcNumero('.')">.</button>
-                </div>
-            </section>
+            <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">
+                <span class="menu-icon">➗</span>
+                <span class="menu-text">Generador de Divisiones</span>
+            </button>
+            <div id="submenu-dividir" class="submenu u-hidden" role="group" aria-label="Niveles de división">
+                <button class="submenu-item" onclick="cambiarDificultad(1)">Nivel 1 (1 Cifra)</button>
+                <button class="submenu-item" onclick="cambiarDificultad(2)">Nivel 2 (2 Cifras)</button>
+                <button class="submenu-item" onclick="cambiarDificultad(3)">Nivel 3 (3 Cifras)</button>
+            </div>
 
-            <!-- Materiales de Aprendizaje -->
-            <section id="aprendizaje-menu" class="u-hidden" aria-label="Selección de temas de aprendizaje">
-                <div class="cards-grid">
-                    <article class="card" onclick="mostrarExplicacion(1)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(1)">
-                        <h3>División por 1 Cifra</h3>
-                        <p>Aprende los pasos básicos para dividir por un solo número.</p>
-                    </article>
-                    <article class="card" onclick="mostrarExplicacion(2)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(2)">
-                        <h3>División por 2 Cifras</h3>
-                        <p>Domina la técnica para divisores de dos dígitos.</p>
-                    </article>
-                    <article class="card" onclick="mostrarExplicacion(3)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(3)">
-                        <h3>División por 3 Cifras</h3>
-                        <p>Conviértete en un experto dividiendo por números grandes.</p>
-                    </article>
-                </div>
-            </section>
+            <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">
+                <span class="menu-icon">📱</span>
+                <span class="menu-text">Calculadora</span>
+            </button>
+            <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">
+                <span class="menu-icon">📚</span>
+                <span class="menu-text">Materiales de Aprendizaje</span>
+            </button>
+        </nav>
 
-            <article id="explicacion-container" class="u-hidden" aria-live="polite">
-                <button class="back-btn" onclick="cambiarModo('aprendizaje')" aria-label="Volver al menú de aprendizaje">← Volver a Temas</button>
+        <button id="desktop-sidebar-toggle" class="desktop-toggle-btn" title="Contraer/Expandir menú" aria-label="Contraer menú">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+
+        <main class="main-content">
+            <section class="container" aria-labelledby="titulo">
                 <header>
-                    <h2 id="explicacion-titulo"></h2>
+                    <h1 id="titulo">Tablas de Multiplicar</h1>
                 </header>
-                <div id="contenido-explicacion"></div>
-            </article>
-        </section>
-    </main>
+                
+                <!-- Controles Generales -->
+                <section id="controles-generales" aria-label="Controles de la herramienta">
+                    <label for="numeroInput" class="sr-only">Ingresa un número</label>
+                    <input type="number" id="numeroInput" placeholder="Ingresa un número" aria-label="Número para generar tabla" />
+                    
+                    <button id="btn-generar" class="action-btn" onclick="generar()">Generar Tabla</button>
+                    <button id="btn-explicacion" class="action-btn btn-info" onclick="irAExplicacion()">Ver Explicación del Tema</button>
+                </section>
+                
+                <section id="resultado-container" aria-live="polite">
+                    <div id="resultado"></div>
+                    <div id="procesos-container" class="u-hidden">
+                        <button id="btn-ver-procesos" class="action-btn btn-success" onclick="mostrarProcesos()">Ver Procesos</button>
+                        <div id="procesos-division" class="ejemplo-box u-hidden" tabindex="0"></div>
+                    </div>
+                </section>
+
+                <!-- Calculadora -->
+                <section id="calculadora-container" class="u-hidden" aria-label="Calculadora básica">
+                    <label for="calc-display" class="sr-only">Pantalla de la calculadora</label>
+                    <input type="text" id="calc-display" readonly value="0" aria-live="polite">
+                    <div class="calculator-grid">
+                        <button class="calc-btn clear" onclick="calcClear()" aria-label="Borrar">C</button>
+                        <button class="calc-btn operator" onclick="calcOperador('/')" aria-label="Dividir">/</button>
+                        <button class="calc-btn operator" onclick="calcOperador('*')" aria-label="Multiplicar">×</button>
+                        
+                        <button class="calc-btn" onclick="calcNumero(7)">7</button>
+                        <button class="calc-btn" onclick="calcNumero(8)">8</button>
+                        <button class="calc-btn" onclick="calcNumero(9)">9</button>
+                        <button class="calc-btn operator" onclick="calcOperador('-')" aria-label="Restar">-</button>
+                        
+                        <button class="calc-btn" onclick="calcNumero(4)">4</button>
+                        <button class="calc-btn" onclick="calcNumero(5)">5</button>
+                        <button class="calc-btn" onclick="calcNumero(6)">6</button>
+                        <button class="calc-btn operator" onclick="calcOperador('+')" aria-label="Sumar">+</button>
+                        
+                        <button class="calc-btn" onclick="calcNumero(1)">1</button>
+                        <button class="calc-btn" onclick="calcNumero(2)">2</button>
+                        <button class="calc-btn" onclick="calcNumero(3)">3</button>
+                        <button class="calc-btn equal" onclick="calcIgual()" aria-label="Igual">=</button>
+                        
+                        <button class="calc-btn calc-btn--span-2" onclick="calcNumero(0)">0</button>
+                        <button class="calc-btn" onclick="calcNumero('.')">.</button>
+                    </div>
+                </section>
+
+                <!-- Materiales de Aprendizaje -->
+                <section id="aprendizaje-menu" class="u-hidden" aria-label="Selección de temas de aprendizaje">
+                    <h2 class="section-title">Temas de Estudio</h2>
+                    <div class="cards-grid">
+                        <article class="card" onclick="mostrarTemasDivision()" role="button" tabindex="0">
+                            <h3>➗ División</h3>
+                            <p>Domina la división desde 1 hasta 3 cifras con guías paso a paso y ejemplos detallados.</p>
+                        </article>
+                        <article class="card" onclick="mostrarTemasMultiplicacion()" role="button" tabindex="0">
+                            <h3>✖️ Multiplicación</h3>
+                            <p>Aprende las tablas y técnicas para multiplicar por 1, 2 y 3 cifras fácilmente.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Submenú Temas División -->
+                <section id="temas-division" class="u-hidden" aria-label="Niveles de división">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
+                    <h2 class="section-title">Elige el Nivel de División</h2>
+                    <div class="cards-grid">
+                        <article class="card" onclick="mostrarExplicacion(1)" role="button" tabindex="0">
+                            <h3>Nivel 1 (1 Cifra)</h3>
+                            <p>Aprende a repartir número por número de forma sencilla.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion(2)" role="button" tabindex="0">
+                            <h3>Nivel 2 (2 Cifras)</h3>
+                            <p>Sube de nivel dividiendo por dos números al mismo tiempo.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion(3)" role="button" tabindex="0">
+                            <h3>Nivel 3 (Con Resto)</h3>
+                            <p>¿Qué pasa cuando la división no es exacta? ¡Descúbrelo aquí!</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion(4)" role="button" tabindex="0">
+                            <h3>Nivel 4 (División Larga)</h3>
+                            <p>Domina el proceso paso a paso para números grandes.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Submenú Temas Multiplicación -->
+                <section id="temas-multiplicacion" class="u-hidden" aria-label="Niveles de multiplicación">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
+                    <h2 class="section-title">Elige el Nivel de Multiplicación</h2>
+                    <div class="cards-grid">
+                        <article class="card" onclick="mostrarExplicacion('m1')" role="button" tabindex="0">
+                            <h3>Nivel 1 (1 Cifra)</h3>
+                            <p>Aprende a multiplicar por una cifra paso a paso.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('m2')" role="button" tabindex="0">
+                            <h3>Nivel 2 (2 Cifras)</h3>
+                            <p>Domina la multiplicación por dos cifras y el uso del cero.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('m3')" role="button" tabindex="0">
+                            <h3>Nivel 3 (3 Cifras)</h3>
+                            <p>Conviértete en experto multiplicando por tres cifras.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('m4')" role="button" tabindex="0">
+                            <h3>Nivel 4 (Decimales)</h3>
+                            <p>Aprende dónde poner la coma al multiplicar decimales.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <article id="explicacion-container" class="u-hidden" aria-live="polite">
+                    <button class="back-btn" onclick="volverANiveles()" aria-label="Volver a niveles">← Volver a Niveles</button>
+                    <header>
+                        <h2 id="explicacion-titulo"></h2>
+                    </header>
+                    <div id="contenido-explicacion"></div>
+                </article>
+
+                <!-- Nuevas Secciones -->
+                <section id="sobre-nosotros-container" class="u-hidden" aria-label="Sobre Nosotros">
+                    <h2 class="section-title">Sobre Nosotros</h2>
+                    <div class="info-content">
+                        <div class="icon-large">👥</div>
+                        <p>En <strong>Creative</strong>, nos dedicamos a transformar el aprendizaje de las matemáticas en una experiencia divertida, interactiva y accesible para todos. Creemos firmemente que con las herramientas adecuadas, cualquier estudiante puede convertirse en un genio de los números.</p>
+                    </div>
+                </section>
+
+                <section id="servicios-container" class="u-hidden" aria-label="Servicios">
+                    <h2 class="section-title">Nuestros Servicios</h2>
+                    <div class="cards-grid">
+                        <article class="card">
+                            <div class="card-icon text-primary">🎓</div>
+                            <h3>Tutorías Personalizadas</h3>
+                            <p>Sesiones uno a uno adaptadas a tu ritmo de aprendizaje y necesidades específicas.</p>
+                        </article>
+                        <article class="card">
+                            <div class="card-icon text-accent">💻</div>
+                            <h3>Plataforma Online</h3>
+                            <p>Acceso 24/7 a herramientas de práctica, generadores de ejercicios y calculadoras.</p>
+                        </article>
+                        <article class="card">
+                            <div class="card-icon text-info">📊</div>
+                            <h3>Seguimiento de Progreso</h3>
+                            <p>Estadísticas detalladas para visualizar tu avance y áreas de mejora.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="blog-container" class="u-hidden" aria-label="Blog">
+                    <h2 class="section-title">Blog Educativo</h2>
+                    <div class="cards-grid">
+                        <article class="card">
+                            <div class="card-icon">📝</div>
+                            <h3>Trucos de Matemáticas</h3>
+                            <p>Descubre técnicas para calcular mentalmente más rápido que una calculadora.</p>
+                        </article>
+                        <article class="card">
+                            <div class="card-icon">🧠</div>
+                            <h3>Neuroeducación</h3>
+                            <p>Entiende cómo aprende tu cerebro para optimizar tus sesiones de estudio.</p>
+                        </article>
+                        <article class="card">
+                            <div class="card-icon">🎮</div>
+                            <h3>Gamificación</h3>
+                            <p>Por qué aprender jugando es la forma más efectiva de retener información.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section id="legal-container" class="u-hidden" aria-label="Legal">
+                    <h2 class="section-title">Información Legal</h2>
+                    <div class="legal-content">
+                        <div class="icon-large" style="text-align: center;">⚖️</div>
+                        
+                        <h3>Política de Privacidad</h3>
+                        <p>En Creative, valoramos tu privacidad. Recopilamos solo la información necesaria para mejorar tu experiencia de aprendizaje. No compartimos tus datos con terceros sin tu consentimiento explícito.</p>
+                        
+                        <h3>Términos y Condiciones</h3>
+                        <p>Al utilizar nuestra plataforma, aceptas usarla con fines educativos y respetuosos. Nos reservamos el derecho de suspender cuentas que violen nuestras normas de comunidad.</p>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p>📧 contacto@creative.com</p>
+                    <p>📞 +57 3123102284</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Ubicación</h3>
+                    <p>📍 Soacha, Colombia</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="cambiarModo('multiplicar'); return false;">Inicio</a></li>
+                        <li><a href="#" onclick="cambiarModo('sobre-nosotros'); return false;">Sobre Nosotros</a></li>
+                        <li><a href="#" onclick="cambiarModo('servicios'); return false;">Servicios</a></li>
+                        <li><a href="#" onclick="cambiarModo('blog'); return false;">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                        </a>
+                        <a href="#" aria-label="Instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a href="#" aria-label="TikTok">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
+                        </a>
+                        <a href="#" aria-label="YouTube">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="cambiarModo('legal'); return false;">Política de Privacidad</a></li>
+                        <li><a href="#" onclick="cambiarModo('legal'); return false;">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Creative. Todos los derechos reservados.</p>
+            </div>
+        </footer>
 
     <script src="js/script.js"></script>
 </body>
