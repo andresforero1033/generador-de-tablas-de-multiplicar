@@ -68,16 +68,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isLogin) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.username);
-                window.location.href = '/app';
+                window.notifications.show('¡Bienvenido!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/app';
+                }, 1000);
             } else {
-                alert('Registro exitoso. Por favor inicia sesión.');
+                window.notifications.show('Registro exitoso. Por favor inicia sesión.', 'success');
                 // Cambiar a vista de login
                 toggleAuth.click();
             }
             
         } catch (error) {
+            window.notifications.show(error.message, 'error');
             errorMessage.textContent = error.message;
             errorMessage.style.display = 'block';
+            window.sounds.playError();
         }
     });
 });

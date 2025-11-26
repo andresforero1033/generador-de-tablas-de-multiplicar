@@ -718,6 +718,14 @@ const App = {
             if (themeBtn) themeBtn.textContent = '☀️';
         }
 
+        // Global Sound Listeners
+        document.addEventListener('click', (e) => {
+            // Play click sound for buttons and interactive elements
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.card') || e.target.closest('.menu-item')) {
+                window.sounds.playClick();
+            }
+        });
+
         // Inicialización Responsive
         const sidebar = $('sidebar');
         if (window.innerWidth <= 768) {
@@ -815,7 +823,10 @@ const App = {
 
         if (mode === 'multiplicar') {
             const num = DOM.inputs.numero.value;
-            if (!num) { alert('Por favor ingresa un número'); return; }
+            if (!num) { 
+                window.notifications.show('Por favor ingresa un número', 'error'); 
+                return; 
+            }
             
             html = `<h3>Tabla del ${num}</h3>`;
             for (let i = 1; i <= 10; i++) {
@@ -884,8 +895,9 @@ window.calcOperador = (op) => Calculator.inputOperator(op);
 window.calcIgual = () => Calculator.equals();
 window.calcClear = () => Calculator.clear();
 
-window.logout = () => {
-    if(confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+window.logout = async () => {
+    const confirmed = await window.modals.confirm('¿Estás seguro de que deseas cerrar sesión?', 'Cerrar Sesión');
+    if(confirmed) {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         window.location.href = '/';
