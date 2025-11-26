@@ -749,3 +749,18 @@ select:focus {
     display: none;
     border: 1px solid var(--color-danger);
 }
+
+.auth-brand {
+    font-size: 2.5rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.auth-container h2 {
+    color: var(--color-text-muted);
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-top: 0;
+}
