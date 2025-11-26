@@ -759,126 +759,84 @@ select:focus {
         overflow-y: auto;
     }
 
-    /* Botón Hamburguesa Creativo */
+    /* Ocultar botón hamburguesa antiguo */
     .mobile-menu-btn {
+        display: none;
+    }
+
+    /* Mostrar botón flotante en móvil */
+    .desktop-toggle-btn {
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 50px;
-        height: 50px;
-        background: white;
-        border: none;
-        border-radius: 50%;
-        padding: 14px 12px;
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        z-index: 2000;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        top: 20px; /* Ajustar posición vertical */
+        /* La posición horizontal se controla dinámicamente con la sidebar */
     }
 
-    .mobile-menu-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(108, 92, 231, 0.2);
-    }
-
-    .mobile-menu-btn .bar {
-        width: 100%;
-        height: 3px;
-        background-color: var(--color-primary);
-        border-radius: 3px;
-        transition: all 0.3s ease;
-        transform-origin: left;
-    }
-
-    /* Animación a "X" */
-    .mobile-menu-btn.open .bar:nth-child(1) {
-        transform: rotate(45deg) translate(2px, -2px);
-    }
-    .mobile-menu-btn.open .bar:nth-child(2) {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    .mobile-menu-btn.open .bar:nth-child(3) {
-        transform: rotate(-45deg) translate(2px, 2px);
-    }
-
-    /* Sidebar Mobile: Menú Hamburguesa (Off-canvas) */
+    /* Sidebar Mobile: Adaptación de 3 estados */
     .sidebar {
         position: fixed;
         top: 0;
         left: 0;
-        width: 80%; /* Ocupa gran parte de la pantalla pero deja ver el fondo */
-        max-width: 300px;
         height: 100vh;
         background-color: rgba(255, 255, 255, 0.98);
         -webkit-backdrop-filter: blur(10px);
         backdrop-filter: blur(10px);
-        padding: 80px 20px 20px 20px; /* Padding top para no chocar con botón */
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
         box-shadow: 5px 0 30px rgba(0,0,0,0.1);
         z-index: 1500;
-        transform: translateX(-100%); /* Oculto por defecto */
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto;
+        /* Usar width para transiciones igual que en desktop */
+        width: 85%; 
+        max-width: 300px;
+        transform: none; /* Quitar transform antiguo */
         border-right: 1px solid var(--color-border);
+        padding-top: var(--spacing-md);
     }
 
-    .sidebar.active {
-        transform: translateX(0); /* Mostrar */
+    /* Estado Colapsado en Móvil (Iconos) */
+    .sidebar.collapsed {
+        width: 70px; /* Un poco más estrecho en móvil */
+        padding: var(--spacing-md) 10px;
     }
 
-    /* Mostrar Header en móvil dentro del menú */
-    .sidebar header {
-        display: block;
-        width: 100%;
-        margin-bottom: 20px;
-        text-align: left;
+    /* Estado Oculto en Móvil (Default) */
+    .sidebar.hidden {
+        width: 0;
+        padding: 0;
+        border: none;
     }
 
-    .sidebar header h2 {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-        color: var(--color-primary);
-    }
-
-    /* Ajustes de items del menú en móvil */
-    .menu-item {
-        width: 100%;
-        margin: 5px 0;
-        padding: 15px;
-        font-size: 1.1rem;
-        border-radius: 12px;
-    }
-
-    /* Submenús en móvil: Acordeón dentro del sidebar */
-    .submenu {
-        position: static; /* Ya no flotante */
-        width: 100%;
-        background: transparent;
-        box-shadow: none;
-        padding-left: 20px;
-        margin-bottom: 10px;
-        display: none; /* Oculto por defecto */
-        flex-direction: column;
-        border-left: 2px solid var(--color-border);
+    /* Ajuste del botón flotante según estado */
+    .desktop-toggle-btn {
+        left: 85%; /* Default expanded position (relative to screen or fixed?) */
+        /* Mejor usar fixed left calculado en JS o CSS relativo si fuera posible. 
+           Como el botón es absolute en app-container, y app-container es full width...
+           Necesitamos que el botón siga al sidebar.
+        */
+        position: fixed;
+        left: 300px; /* Fallback max */
+        z-index: 1600;
     }
     
-    .submenu:not(.u-hidden) {
-        display: flex;
-        animation: slideDown 0.3s ease-out;
+    /* Ajustes específicos de posición del botón */
+    .sidebar:not(.hidden):not(.collapsed) + .desktop-toggle-btn {
+        left: 85%; /* Coincide con width 85% */
+        /* max-left no existe, usamos clamp o min en left */
+        left: min(85%, 300px);
     }
 
-    .submenu-item {
-        background-color: transparent;
-        border: none;
-        padding: 12px;
-        font-size: 1rem;
-        text-align: left;
+    .sidebar.collapsed + .desktop-toggle-btn {
+        left: 70px;
+    }
+
+    .sidebar.hidden + .desktop-toggle-btn {
+        left: 20px;
+    }
+
+    /* Ajustes de contenido del sidebar */
+    .sidebar header h2 {
+        font-size: 1.5rem;
+    }
+
+    .sidebar.collapsed header h2 {
+        display: none; /* Ocultar título en colapsado móvil */
     }
 
     /* Contenido Principal Móvil */
@@ -886,8 +844,11 @@ select:focus {
         padding: var(--spacing-sm);
         width: 100%;
         overflow-x: hidden;
-        padding-top: 80px; /* Espacio para el botón flotante */
+        padding-top: 60px; /* Espacio para el botón si está flotando sobre contenido */
     }
+
+    /* Ajuste para que el contenido no se oculte bajo el sidebar expandido */
+    /* En móvil, el sidebar es overlay, así que tapa el contenido. Es el comportamiento esperado. */
 
     .container {
         padding: var(--spacing-md);

@@ -718,16 +718,13 @@ const App = {
             if (themeBtn) themeBtn.textContent = '☀️';
         }
 
-        // Mobile Menu Toggle
-        if (DOM.buttons.mobileMenu) {
-            DOM.buttons.mobileMenu.addEventListener('click', () => {
-                const sidebar = $('sidebar');
-                sidebar.classList.toggle('active');
-                DOM.buttons.mobileMenu.classList.toggle('open');
-            });
+        // Inicialización Responsive
+        const sidebar = $('sidebar');
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('hidden');
         }
 
-        // Desktop Sidebar Toggle
+        // Desktop Sidebar Toggle (Ahora funciona en Móvil también)
         const desktopToggleBtn = $('desktop-sidebar-toggle');
         if (desktopToggleBtn) {
             desktopToggleBtn.addEventListener('click', () => {
@@ -751,8 +748,10 @@ const App = {
         menuItems.forEach(item => {
             item.addEventListener('click', () => {
                 if (window.innerWidth <= 768) {
-                    $('sidebar').classList.remove('active');
-                    DOM.buttons.mobileMenu.classList.remove('open');
+                    // En móvil, al hacer click, colapsamos o escondemos?
+                    // Mejor esconder para dar espacio
+                    $('sidebar').classList.add('hidden');
+                    $('sidebar').classList.remove('collapsed');
                 }
             });
         });
