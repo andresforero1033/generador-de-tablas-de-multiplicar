@@ -46,6 +46,7 @@ app.post('/api/login', async (req, res) => {
 
 // Rutas de Vistas
 app.get('/', (req, res) => {
+    console.log('Solicitud recibida en ruta raíz /');
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
