@@ -56,6 +56,7 @@ const DOM = {
         generar: $('btn-generar'),
         explicacion: $('btn-explicacion'),
         verProcesos: $('btn-ver-procesos'),
+        mobileMenu: $('mobile-menu-btn'), // Nuevo botón
     },
     text: {
         titulo: $('titulo'),
@@ -480,6 +481,26 @@ const App = {
     init: () => {
         // Event Listeners Globales
         document.addEventListener('keydown', App.handleKeydown);
+        
+        // Mobile Menu Toggle
+        if (DOM.buttons.mobileMenu) {
+            DOM.buttons.mobileMenu.addEventListener('click', () => {
+                const sidebar = $('sidebar');
+                sidebar.classList.toggle('active');
+                DOM.buttons.mobileMenu.classList.toggle('open');
+            });
+        }
+
+        // Cerrar menú al hacer click en un item (móvil)
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    $('sidebar').classList.remove('active');
+                    DOM.buttons.mobileMenu.classList.remove('open');
+                }
+            });
+        });
         
         // Inicializar vista
         // (Opcional: cargar estado previo si existiera persistencia)
