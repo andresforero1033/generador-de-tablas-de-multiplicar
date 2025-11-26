@@ -21,27 +21,27 @@
 <body>
     <nav class="sidebar" aria-label="Menú principal">
         <header>
-            <h2>Matemáticas</h2>
+            <h2>🧮 Matemáticas</h2>
             <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
         </header>
-        <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">Tablas de Multiplicar</button>
+        <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">✖️ Tablas de Multiplicar</button>
         
-        <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">Generador de Multiplicaciones</button>
+        <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">📝 Generador de Multiplicaciones</button>
         <div id="submenu-multiplicar-gen" class="submenu u-hidden" role="group" aria-label="Niveles de multiplicación">
             <button class="submenu-item" onclick="cambiarDificultadMulti(1)">Nivel 1 (1 Cifra)</button>
             <button class="submenu-item" onclick="cambiarDificultadMulti(2)">Nivel 2 (2 Cifras)</button>
             <button class="submenu-item" onclick="cambiarDificultadMulti(3)">Nivel 3 (3 Cifras)</button>
         </div>
 
-        <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">Generador de Divisiones</button>
+        <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">➗ Generador de Divisiones</button>
         <div id="submenu-dividir" class="submenu u-hidden" role="group" aria-label="Niveles de división">
             <button class="submenu-item" onclick="cambiarDificultad(1)">Nivel 1 (1 Cifra)</button>
             <button class="submenu-item" onclick="cambiarDificultad(2)">Nivel 2 (2 Cifras)</button>
             <button class="submenu-item" onclick="cambiarDificultad(3)">Nivel 3 (3 Cifras)</button>
         </div>
 
-        <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">Calculadora</button>
-        <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">Materiales de Aprendizaje</button>
+        <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">📱 Calculadora</button>
+        <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">📚 Materiales de Aprendizaje</button>
     </nav>
 
     <main class="main-content">
