@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Rutas de Vistas (Mover arriba para prioridad)
 app.get('/', (req, res) => {
