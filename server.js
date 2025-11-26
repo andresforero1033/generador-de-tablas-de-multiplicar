@@ -19,7 +19,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Conexión a MongoDB
+// Rutas de Vistas (Mover arriba para prioridad)
+app.get('/', (req, res) => {
+    console.log('Acceso a ruta raíz - Enviando login.html');
+    const loginPath = path.join(__dirname, 'public', 'login.html');
+    res.sendFile(loginPath);
+});
+
+app.get('/app', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Conexión a MongoDB (No bloqueante)
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Conectado a MongoDB Atlas'))
     .catch(err => console.error('Error conectando a MongoDB:', err));
@@ -51,16 +62,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Rutas de Vistas
-app.get('/', (req, res) => {
-    console.log('Acceso a ruta raíz - Enviando login.html');
-    const loginPath = path.join(__dirname, 'public', 'login.html');
-    console.log('Ruta del archivo:', loginPath);
-    res.sendFile(loginPath);
-});
-
-app.get('/app', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// (Eliminadas de aquí porque se movieron arriba)
 
 // Manejo de rutas no encontradas (SPA fallback si fuera necesario, pero aquí redirigimos a login)
 app.get('*', (req, res) => {
