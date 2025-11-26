@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Herramienta educativa para aprender tablas de multiplicar, divisiones y usar calculadora.">
+    <title>Generador de Tablas de Multiplicar y Divisiones</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        // Protección de ruta
+        if (!localStorage.getItem('token')) {
+            window.location.href = '/';
+        }
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <nav class="sidebar" aria-label="Menú principal">
+        <header>
+            <h2>Matemáticas</h2>
+            <button onclick="logout()" class="logout-btn">Cerrar Sesión</button>
+        </header>
+        <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">Tablas de Multiplicar</button>
+        
+        <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">Generador de Multiplicaciones</button>
+        <div id="submenu-multiplicar-gen" class="submenu u-hidden" role="group" aria-label="Niveles de multiplicación">
+            <button class="submenu-item" onclick="cambiarDificultadMulti(1)">Nivel 1 (1 Cifra)</button>
+            <button class="submenu-item" onclick="cambiarDificultadMulti(2)">Nivel 2 (2 Cifras)</button>
+            <button class="submenu-item" onclick="cambiarDificultadMulti(3)">Nivel 3 (3 Cifras)</button>
+        </div>
+
+        <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">Generador de Divisiones</button>
+        <div id="submenu-dividir" class="submenu u-hidden" role="group" aria-label="Niveles de división">
+            <button class="submenu-item" onclick="cambiarDificultad(1)">Nivel 1 (1 Cifra)</button>
+            <button class="submenu-item" onclick="cambiarDificultad(2)">Nivel 2 (2 Cifras)</button>
+            <button class="submenu-item" onclick="cambiarDificultad(3)">Nivel 3 (3 Cifras)</button>
+        </div>
+
+        <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">Calculadora</button>
+        <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">Materiales de Aprendizaje</button>
+    </nav>
+
+    <main class="main-content">
+        <section class="container" aria-labelledby="titulo">
+            <header>
+                <h1 id="titulo">Tablas de Multiplicar</h1>
+            </header>
+            
+            <!-- Controles Generales -->
+            <section id="controles-generales" aria-label="Controles de la herramienta">
+                <label for="numeroInput" class="sr-only">Ingresa un número</label>
+                <input type="number" id="numeroInput" placeholder="Ingresa un número" aria-label="Número para generar tabla" />
+                
+                <button id="btn-generar" class="action-btn" onclick="generar()">Generar Tabla</button>
+                <button id="btn-explicacion" class="action-btn btn-info" onclick="irAExplicacion()">Ver Explicación del Tema</button>
+            </section>
+            
+            <section id="resultado-container" aria-live="polite">
+                <div id="resultado"></div>
+                <div id="procesos-container" class="u-hidden">
+                    <button id="btn-ver-procesos" class="action-btn btn-success" onclick="mostrarProcesos()">Ver Procesos</button>
+                    <div id="procesos-division" class="ejemplo-box u-hidden" tabindex="0"></div>
+                </div>
+            </section>
+
+            <!-- Calculadora -->
+            <section id="calculadora-container" class="u-hidden" aria-label="Calculadora básica">
+                <label for="calc-display" class="sr-only">Pantalla de la calculadora</label>
+                <input type="text" id="calc-display" readonly value="0" aria-live="polite">
+                <div class="calculator-grid">
+                    <button class="calc-btn clear" onclick="calcClear()" aria-label="Borrar">C</button>
+                    <button class="calc-btn operator" onclick="calcOperador('/')" aria-label="Dividir">/</button>
+                    <button class="calc-btn operator" onclick="calcOperador('*')" aria-label="Multiplicar">×</button>
+                    
+                    <button class="calc-btn" onclick="calcNumero(7)">7</button>
+                    <button class="calc-btn" onclick="calcNumero(8)">8</button>
+                    <button class="calc-btn" onclick="calcNumero(9)">9</button>
+                    <button class="calc-btn operator" onclick="calcOperador('-')" aria-label="Restar">-</button>
+                    
+                    <button class="calc-btn" onclick="calcNumero(4)">4</button>
+                    <button class="calc-btn" onclick="calcNumero(5)">5</button>
+                    <button class="calc-btn" onclick="calcNumero(6)">6</button>
+                    <button class="calc-btn operator" onclick="calcOperador('+')" aria-label="Sumar">+</button>
+                    
+                    <button class="calc-btn" onclick="calcNumero(1)">1</button>
+                    <button class="calc-btn" onclick="calcNumero(2)">2</button>
+                    <button class="calc-btn" onclick="calcNumero(3)">3</button>
+                    <button class="calc-btn equal" onclick="calcIgual()" aria-label="Igual">=</button>
+                    
+                    <button class="calc-btn calc-btn--span-2" onclick="calcNumero(0)">0</button>
+                    <button class="calc-btn" onclick="calcNumero('.')">.</button>
+                </div>
+            </section>
+
+            <!-- Materiales de Aprendizaje -->
+            <section id="aprendizaje-menu" class="u-hidden" aria-label="Selección de temas de aprendizaje">
+                <div class="cards-grid">
+                    <article class="card" onclick="mostrarExplicacion(1)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(1)">
+                        <h3>División por 1 Cifra</h3>
+                        <p>Aprende los pasos básicos para dividir por un solo número.</p>
+                    </article>
+                    <article class="card" onclick="mostrarExplicacion(2)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(2)">
+                        <h3>División por 2 Cifras</h3>
+                        <p>Domina la técnica para divisores de dos dígitos.</p>
+                    </article>
+                    <article class="card" onclick="mostrarExplicacion(3)" role="button" tabindex="0" onkeypress="if(event.key === 'Enter') mostrarExplicacion(3)">
+                        <h3>División por 3 Cifras</h3>
+                        <p>Conviértete en un experto dividiendo por números grandes.</p>
+                    </article>
+                </div>
+            </section>
+
+            <article id="explicacion-container" class="u-hidden" aria-live="polite">
+                <button class="back-btn" onclick="cambiarModo('aprendizaje')" aria-label="Volver al menú de aprendizaje">← Volver a Temas</button>
+                <header>
+                    <h2 id="explicacion-titulo"></h2>
+                </header>
+                <div id="contenido-explicacion"></div>
+            </article>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
