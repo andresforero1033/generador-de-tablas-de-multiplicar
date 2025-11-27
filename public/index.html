@@ -28,35 +28,31 @@
                 </button>
             </header>
             
-            <button id="menu-multiplicar" class="menu-item active" onclick="cambiarModo('multiplicar')" aria-current="page">
-                <span class="menu-icon">✖️</span>
-                <span class="menu-text">Tablas de Multiplicar</span>
+            <button id="menu-home" class="menu-item" onclick="cambiarModo('home')">
+                <span class="menu-icon">🏠</span>
+                <span class="menu-text">Inicio</span>
+            </button>
+
+            <button id="menu-perfil" class="menu-item" onclick="cambiarModo('perfil')">
+                <span class="menu-icon">👤</span>
+                <span class="menu-text">Mi Perfil</span>
             </button>
             
-            <button id="menu-multiplicar-gen" class="menu-item" onclick="cambiarModo('multiplicar-gen')">
-                <span class="menu-icon">📝</span>
-                <span class="menu-text">Generador de Multiplicaciones</span>
+            <button id="menu-multiplicar" class="menu-item" onclick="ModuleManager.switchModule('multiplication')">
+                <span class="menu-icon">✖️</span>
+                <span class="menu-text">Módulo Multiplicación</span>
             </button>
-            <div id="submenu-multiplicar-gen" class="submenu u-hidden" role="group" aria-label="Niveles de multiplicación">
-                <button class="submenu-item" onclick="cambiarDificultadMulti(1)">Nivel 1 (1 Cifra)</button>
-                <button class="submenu-item" onclick="cambiarDificultadMulti(2)">Nivel 2 (2 Cifras)</button>
-                <button class="submenu-item" onclick="cambiarDificultadMulti(3)">Nivel 3 (3 Cifras)</button>
-            </div>
-
-            <button id="menu-dividir" class="menu-item" onclick="cambiarModo('dividir')">
+            
+            <button id="menu-dividir" class="menu-item" onclick="ModuleManager.switchModule('division')">
                 <span class="menu-icon">➗</span>
-                <span class="menu-text">Generador de Divisiones</span>
+                <span class="menu-text">Módulo División</span>
             </button>
-            <div id="submenu-dividir" class="submenu u-hidden" role="group" aria-label="Niveles de división">
-                <button class="submenu-item" onclick="cambiarDificultad(1)">Nivel 1 (1 Cifra)</button>
-                <button class="submenu-item" onclick="cambiarDificultad(2)">Nivel 2 (2 Cifras)</button>
-                <button class="submenu-item" onclick="cambiarDificultad(3)">Nivel 3 (3 Cifras)</button>
-            </div>
 
-            <button id="menu-calculadora" class="menu-item" onclick="cambiarModo('calculadora')">
-                <span class="menu-icon">📱</span>
-                <span class="menu-text">Calculadora</span>
+            <button id="menu-herramientas" class="menu-item" onclick="cambiarModo('herramientas')">
+                <span class="menu-icon">🛠️</span>
+                <span class="menu-text">Herramientas</span>
             </button>
+            
             <button id="menu-aprendizaje" class="menu-item" onclick="cambiarModo('aprendizaje')">
                 <span class="menu-icon">📚</span>
                 <span class="menu-text">Materiales de Aprendizaje</span>
@@ -70,11 +66,166 @@
         <main class="main-content">
             <section class="container" aria-labelledby="titulo">
                 <header>
-                    <h1 id="titulo">Tablas de Multiplicar</h1>
+                    <h1 id="titulo">Bienvenido a Creative</h1>
                 </header>
+
+                <!-- Home Dashboard -->
+                <section id="home-dashboard" class="u-hidden" aria-label="Panel Principal">
+                    <p class="welcome-text">Selecciona un módulo para comenzar a aprender</p>
+                    <div class="cards-grid dashboard-grid">
+                        <article class="card dashboard-card" onclick="cambiarModo('perfil')" role="button" tabindex="0">
+                            <div class="card-icon">👤</div>
+                            <h3>Mi Perfil</h3>
+                            <p>Mira tu progreso, medallas y personaliza tu avatar.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('multiplication')" role="button" tabindex="0">
+                            <div class="card-icon">✖️</div>
+                            <h3>Multiplicación</h3>
+                            <p>Aprende, practica y evalúate en las tablas de multiplicar.</p>
+                        </article>
+                        
+                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('division')" role="button" tabindex="0">
+                            <div class="card-icon">➗</div>
+                            <h3>División</h3>
+                            <p>Domina la división con ejercicios paso a paso.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="cambiarModo('herramientas')" role="button" tabindex="0">
+                            <div class="card-icon">🛠️</div>
+                            <h3>Herramientas</h3>
+                            <p>Calculadora y Generador de Tablas personalizadas.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="cambiarModo('aprendizaje')" role="button" tabindex="0">
+                            <div class="card-icon">📚</div>
+                            <h3>Aprendizaje</h3>
+                            <p>Material teórico sobre conjuntos numéricos y operaciones.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Perfil de Usuario -->
+                <section id="perfil-container" class="u-hidden" aria-label="Perfil de Usuario">
+                    <div class="profile-header-card">
+                        <div class="avatar-section">
+                            <div class="current-avatar" id="profile-avatar">🦁</div>
+                            <button class="edit-avatar-btn" onclick="ProfileManager.toggleAvatarSelector()" title="Cambiar Avatar">✏️</button>
+                        </div>
+                        <div class="user-info">
+                            <h2 id="profile-name">Explorador</h2>
+                            <p class="level-badge">Nivel <span id="profile-level">1</span></p>
+                        </div>
+                    </div>
+
+                    <div id="avatar-selector" class="avatar-selector u-hidden">
+                        <h3>Elige tu Avatar</h3>
+                        <div class="avatars-grid">
+                            <button onclick="ProfileManager.setAvatar('🦁')">🦁</button>
+                            <button onclick="ProfileManager.setAvatar('🐯')">🐯</button>
+                            <button onclick="ProfileManager.setAvatar('🐻')">🐻</button>
+                            <button onclick="ProfileManager.setAvatar('🐼')">🐼</button>
+                            <button onclick="ProfileManager.setAvatar('🐨')">🐨</button>
+                            <button onclick="ProfileManager.setAvatar('🦊')">🦊</button>
+                            <button onclick="ProfileManager.setAvatar('🐰')">🐰</button>
+                            <button onclick="ProfileManager.setAvatar('🦄')">🦄</button>
+                            <button onclick="ProfileManager.setAvatar('🦖')">🦖</button>
+                            <button onclick="ProfileManager.setAvatar('🚀')">🚀</button>
+                            <button onclick="ProfileManager.setAvatar('⭐')">⭐</button>
+                            <button onclick="ProfileManager.setAvatar('🤖')">🤖</button>
+                            <button onclick="ProfileManager.setAvatar('👽')">👽</button>
+                            <button onclick="ProfileManager.setAvatar('👾')">👾</button>
+                            <button onclick="ProfileManager.setAvatar('🐱')">🐱</button>
+                            <button onclick="ProfileManager.setAvatar('🐶')">🐶</button>
+                        </div>
+                    </div>
+
+                    <div class="stats-overview">
+                        <div class="stat-card">
+                            <div class="stat-icon">⭐</div>
+                            <div class="stat-value" id="profile-stars">0</div>
+                            <div class="stat-label">Estrellas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🏆</div>
+                            <div class="stat-value" id="profile-trophies">0</div>
+                            <div class="stat-label">Trofeos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📝</div>
+                            <div class="stat-value" id="profile-exercises">0</div>
+                            <div class="stat-label">Ejercicios</div>
+                        </div>
+                    </div>
+
+                    <div class="achievements-section">
+                        <h3>Mis Logros</h3>
+                        <div class="badges-grid" id="badges-container">
+                            <!-- Badges will be injected here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Nuevo Contenedor Modular -->
+                <div id="module-container" class="u-hidden">
+                    <h2 id="module-title" class="section-title">Módulo</h2>
+                    
+                    <!-- Tabs de Navegación -->
+                    <div class="module-tabs">
+                        <button class="module-tab active" data-tab="explicacion">Explicación</button>
+                        <button class="module-tab" data-tab="generador">Generador</button>
+                        <button class="module-tab" data-tab="practica">Práctica</button>
+                        <button class="module-tab" data-tab="talleres">Talleres</button>
+                        <button class="module-tab" data-tab="examen">Examen</button>
+                    </div>
+
+                    <!-- Secciones de Contenido -->
+                    <div id="section-explicacion" class="module-section">
+                        <div id="explanation-content"></div>
+                    </div>
+
+                    <div id="section-generador" class="module-section u-hidden">
+                        <div class="generator-controls">
+                            <select id="gen-type">
+                                <option value="N">Naturales (N)</option>
+                                <option value="Z">Enteros (Z)</option>
+                                <option value="Q">Racionales (Q)</option>
+                            </select>
+                            <select id="gen-diff">
+                                <option value="1">Nivel 1</option>
+                                <option value="2">Nivel 2</option>
+                                <option value="3">Nivel 3</option>
+                            </select>
+                            <button class="action-btn" onclick="ModuleManager.generateSingle()">Generar</button>
+                        </div>
+                        <div id="gen-display" class="gen-display-area"></div>
+                        <div class="gen-actions">
+                            <button id="btn-show-result" class="action-btn btn-info u-hidden" onclick="ModuleManager.showGenResult()">Ver Resultado</button>
+                            <button id="btn-show-steps" class="action-btn btn-success u-hidden" onclick="ModuleManager.showGenSteps()">Ver Pasos</button>
+                        </div>
+                        <div id="gen-steps" class="gen-steps-area u-hidden"></div>
+                    </div>
+
+                    <div id="section-practica" class="module-section u-hidden">
+                        <div id="practice-area"></div>
+                    </div>
+
+                    <div id="section-talleres" class="module-section u-hidden">
+                        <div class="workshop-setup">
+                            <h3>Generador de Talleres</h3>
+                            <p>Crea una hoja de ejercicios para resolver en tu cuaderno.</p>
+                            <!-- Placeholder for Workshop logic if needed, or reuse generator -->
+                            <p><em>Próximamente: Descarga de PDF</em></p>
+                        </div>
+                    </div>
+
+                    <div id="section-examen" class="module-section u-hidden">
+                        <div id="exam-content"></div>
+                    </div>
+                </div>
                 
-                <!-- Controles Generales -->
-                <section id="controles-generales" aria-label="Controles de la herramienta">
+                <!-- Controles Generales (Legacy - Ocultos por defecto o usados para otros modos) -->
+                <section id="controles-generales" class="u-hidden" aria-label="Controles de la herramienta">
                     <label for="numeroInput" class="sr-only">Ingresa un número</label>
                     <input type="number" id="numeroInput" placeholder="Ingresa un número" aria-label="Número para generar tabla" />
                     
@@ -119,6 +270,21 @@
                     </div>
                 </section>
 
+                <!-- Menú Herramientas -->
+                <section id="herramientas-menu" class="u-hidden" aria-label="Selección de herramientas">
+                    <h2 class="section-title">Herramientas Útiles</h2>
+                    <div class="cards-grid">
+                        <article class="card" onclick="cambiarModo('generador-tablas')" role="button" tabindex="0">
+                            <h3>✖️ Generador de Tablas</h3>
+                            <p>Crea tablas de multiplicar personalizadas al instante.</p>
+                        </article>
+                        <article class="card" onclick="cambiarModo('calculadora')" role="button" tabindex="0">
+                            <h3>📱 Calculadora</h3>
+                            <p>Realiza operaciones matemáticas básicas rápidamente.</p>
+                        </article>
+                    </div>
+                </section>
+
                 <!-- Materiales de Aprendizaje -->
                 <section id="aprendizaje-menu" class="u-hidden" aria-label="Selección de temas de aprendizaje">
                     <h2 class="section-title">Temas de Estudio</h2>
@@ -130,6 +296,26 @@
                         <article class="card" onclick="mostrarTemasMultiplicacion()" role="button" tabindex="0">
                             <h3>✖️ Multiplicación</h3>
                             <p>Aprende las tablas y técnicas para multiplicar por 1, 2 y 3 cifras fácilmente.</p>
+                        </article>
+                        <article class="card" onclick="mostrarTemasConjuntos()" role="button" tabindex="0">
+                            <h3>🔢 Conjuntos Numéricos</h3>
+                            <p>Aprende sobre Números Naturales, Enteros y Racionales (Fracciones).</p>
+                        </article>
+                        <article class="card" onclick="cambiarModo('blog')" role="button" tabindex="0">
+                            <h3>📝 Blog Educativo</h3>
+                            <p>Trucos, neuroeducación y gamificación para mejorar tu aprendizaje.</p>
+                        </article>
+                        <article class="card" onclick="cambiarModo('sobre-nosotros')" role="button" tabindex="0">
+                            <h3>👥 Sobre Nosotros</h3>
+                            <p>Conoce nuestra misión y visión educativa.</p>
+                        </article>
+                        <article class="card" onclick="cambiarModo('servicios')" role="button" tabindex="0">
+                            <h3>🛠️ Servicios</h3>
+                            <p>Tutorías y herramientas personalizadas.</p>
+                        </article>
+                        <article class="card" onclick="cambiarModo('legal')" role="button" tabindex="0">
+                            <h3>⚖️ Legal</h3>
+                            <p>Términos, condiciones y privacidad.</p>
                         </article>
                     </div>
                 </section>
@@ -163,6 +349,10 @@
                     <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
                     <h2 class="section-title">Elige el Nivel de Multiplicación</h2>
                     <div class="cards-grid">
+                        <article class="card" onclick="mostrarExplicacion('multiplicar')" role="button" tabindex="0">
+                            <h3>Conceptos Básicos</h3>
+                            <p>Entiende qué es multiplicar y trucos para las tablas.</p>
+                        </article>
                         <article class="card" onclick="mostrarExplicacion('m1')" role="button" tabindex="0">
                             <h3>Nivel 1 (1 Cifra)</h3>
                             <p>Aprende a multiplicar por una cifra paso a paso.</p>
@@ -182,6 +372,26 @@
                     </div>
                 </section>
 
+                <!-- Submenú Temas Conjuntos -->
+                <section id="temas-conjuntos" class="u-hidden" aria-label="Temas de Conjuntos Numéricos">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
+                    <h2 class="section-title">Conjuntos Numéricos</h2>
+                    <div class="cards-grid">
+                        <article class="card" onclick="mostrarExplicacion('N')" role="button" tabindex="0">
+                            <h3>Naturales (N)</h3>
+                            <p>Los números que usamos para contar. Operaciones básicas.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('Z')" role="button" tabindex="0">
+                            <h3>Enteros (Z)</h3>
+                            <p>Números positivos y negativos. ¡Aprende la Ley de Signos!</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('Q')" role="button" tabindex="0">
+                            <h3>Racionales (Q)</h3>
+                            <p>Fracciones y decimales. Suma, resta, multiplicación y división.</p>
+                        </article>
+                    </div>
+                </section>
+
                 <article id="explicacion-container" class="u-hidden" aria-live="polite">
                     <button class="back-btn" onclick="volverANiveles()" aria-label="Volver a niveles">← Volver a Niveles</button>
                     <header>
@@ -192,6 +402,7 @@
 
                 <!-- Nuevas Secciones -->
                 <section id="sobre-nosotros-container" class="u-hidden" aria-label="Sobre Nosotros">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
                     <h2 class="section-title">Sobre Nosotros</h2>
                     <div class="info-content">
                         <div class="icon-large">👥</div>
@@ -200,6 +411,7 @@
                 </section>
 
                 <section id="servicios-container" class="u-hidden" aria-label="Servicios">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
                     <h2 class="section-title">Nuestros Servicios</h2>
                     <div class="cards-grid">
                         <article class="card">
@@ -221,6 +433,7 @@
                 </section>
 
                 <section id="blog-container" class="u-hidden" aria-label="Blog">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
                     <h2 class="section-title">Blog Educativo</h2>
                     <div class="cards-grid">
                         <article class="card">
@@ -242,6 +455,7 @@
                 </section>
 
                 <section id="legal-container" class="u-hidden" aria-label="Legal">
+                    <button class="back-btn" onclick="cambiarModo('aprendizaje')">← Volver a Materiales</button>
                     <h2 class="section-title">Información Legal</h2>
                     <div class="legal-content">
                         <div class="icon-large" style="text-align: center;">⚖️</div>
@@ -257,57 +471,9 @@
         </main>
     </div>
 
-    <footer class="site-footer">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Contacto</h3>
-                    <p>📧 contacto@creative.com</p>
-                    <p>📞 +57 3123102284</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Ubicación</h3>
-                    <p>📍 Soacha, Colombia</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Enlaces Rápidos</h3>
-                    <ul class="footer-links">
-                        <li><a href="#" onclick="cambiarModo('multiplicar'); return false;">Inicio</a></li>
-                        <li><a href="#" onclick="cambiarModo('sobre-nosotros'); return false;">Sobre Nosotros</a></li>
-                        <li><a href="#" onclick="cambiarModo('servicios'); return false;">Servicios</a></li>
-                        <li><a href="#" onclick="cambiarModo('blog'); return false;">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Síguenos</h3>
-                    <div class="social-icons">
-                        <a href="#" aria-label="Facebook">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                        </a>
-                        <a href="#" aria-label="Instagram">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                        </a>
-                        <a href="#" aria-label="TikTok">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
-                        </a>
-                        <a href="#" aria-label="YouTube">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
-                        </a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul class="footer-links">
-                        <li><a href="#" onclick="cambiarModo('legal'); return false;">Política de Privacidad</a></li>
-                        <li><a href="#" onclick="cambiarModo('legal'); return false;">Términos y Condiciones</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>© 2025 Creative. Todos los derechos reservados.</p>
-            </div>
-        </footer>
-
     <script src="js/ui.js"></script>
+    <script src="js/math_core.js"></script>
+    <script src="js/module_manager.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>

@@ -28,22 +28,30 @@ const $ = (id) => document.getElementById(id);
 
 const DOM = {
     menus: {
+        home: $('menu-home'),
+        perfil: $('menu-perfil'),
         multiplicar: $('menu-multiplicar'),
         multiplicarGen: $('menu-multiplicar-gen'),
         dividir: $('menu-dividir'),
         calculadora: $('menu-calculadora'),
         aprendizaje: $('menu-aprendizaje'),
+        herramientas: $('menu-herramientas'),
     },
     submenus: {
         multiplicarGen: $('submenu-multiplicar-gen'),
         dividir: $('submenu-dividir'),
     },
     containers: {
+        home: $('home-dashboard'),
+        perfil: $('perfil-container'),
         general: $('controles-generales'),
+        module: $('module-container'), // Nuevo contenedor modular
         calculadora: $('calculadora-container'),
         aprendizaje: $('aprendizaje-menu'),
+        herramientas: $('herramientas-menu'),
         temasDivision: $('temas-division'),
-        temasMultiplicacion: $('temas-multiplicacion'), // Nuevo contenedor
+        temasMultiplicacion: $('temas-multiplicacion'),
+        temasConjuntos: $('temas-conjuntos'), // Nuevo contenedor
         explicacion: $('explicacion-container'),
         sobreNosotros: $('sobre-nosotros-container'),
         servicios: $('servicios-container'),
@@ -283,6 +291,7 @@ class Calculator {
  */
 const UI = {
     toggleElement: (element, show) => {
+        if (!element) return;
         if (show) {
             element.classList.remove('u-hidden');
             element.style.display = ''; // Limpiar inline style si existe
@@ -321,6 +330,12 @@ const UI = {
         DOM.text.titulo.textContent = 'Niveles de Multiplicación';
     },
 
+    showSetsTopics: () => {
+        UI.resetViews();
+        UI.toggleElement(DOM.containers.temasConjuntos, true);
+        DOM.text.titulo.textContent = 'Conjuntos Numéricos';
+    },
+
     backToLevels: () => {
         // Determinar a qué menú de niveles volver basado en el contenido actual
         // O simplemente volver al menú principal si es ambiguo, pero intentaremos ser listos
@@ -337,49 +352,60 @@ const UI = {
         if (titulo.includes('División')) {
             UI.toggleElement(DOM.containers.temasDivision, true);
             DOM.text.titulo.textContent = 'Niveles de División';
-        } else {
+        } else if (titulo.includes('Multiplicación')) {
             UI.toggleElement(DOM.containers.temasMultiplicacion, true);
             DOM.text.titulo.textContent = 'Niveles de Multiplicación';
+        } else {
+            UI.toggleElement(DOM.containers.temasConjuntos, true);
+            DOM.text.titulo.textContent = 'Conjuntos Numéricos';
         }
     },
 
     updateActiveMenu: (mode) => {
-        Object.values(DOM.menus).forEach(btn => btn.classList.remove('active'));
+        Object.values(DOM.menus).forEach(btn => {
+            if (btn) btn.classList.remove('active');
+        });
         
         const menuMap = {
+            'home': DOM.menus.home,
+            'perfil': DOM.menus.perfil,
             'multiplicar': DOM.menus.multiplicar,
             'multiplicar-gen': DOM.menus.multiplicarGen,
             'dividir': DOM.menus.dividir,
-            'calculadora': DOM.menus.calculadora,
-            'aprendizaje': DOM.menus.aprendizaje
+            'calculadora': DOM.menus.herramientas,
+            'generador-tablas': DOM.menus.herramientas,
+            'aprendizaje': DOM.menus.aprendizaje,
+            'herramientas': DOM.menus.herramientas
         };
         
         if (menuMap[mode]) menuMap[mode].classList.add('active');
     },
 
     changeMode: (mode) => {
-        // Manejo de toggles de submenús
-        if (mode === 'dividir' && state.mode === 'dividir') {
-            UI.toggleSubmenu('dividir');
-            return;
-        }
-        if (mode === 'multiplicar-gen' && state.mode === 'multiplicar-gen') {
-            UI.toggleSubmenu('multiplicarGen');
-            return;
-        }
-
         state.mode = mode;
         UI.updateActiveMenu(mode);
-        
-        // Gestión de visibilidad de submenús
-        UI.toggleElement(DOM.submenus.dividir, mode === 'dividir');
-        UI.toggleElement(DOM.submenus.multiplicarGen, mode === 'multiplicar-gen');
 
         UI.resetViews();
 
+        // Asegurar que el título global sea visible (por si venimos de un módulo que lo ocultó)
+        UI.toggleElement(DOM.text.titulo, true);
+
         // Configuración específica por modo
         switch(mode) {
-            case 'multiplicar':
+            case 'home':
+                DOM.text.titulo.textContent = 'Bienvenido a Creative';
+                UI.toggleElement(DOM.containers.home, true);
+                break;
+            case 'perfil':
+                DOM.text.titulo.textContent = 'Mi Perfil';
+                UI.toggleElement(DOM.containers.perfil, true);
+                if(window.ProfileManager) window.ProfileManager.renderProfile();
+                break;
+            case 'herramientas':
+                DOM.text.titulo.textContent = 'Herramientas';
+                UI.toggleElement(DOM.containers.herramientas, true);
+                break;
+            case 'generador-tablas':
                 DOM.text.titulo.textContent = 'Tablas de Multiplicar';
                 UI.toggleElement(DOM.containers.general, true);
                 DOM.buttons.generar.textContent = 'Generar Tabla';
@@ -484,7 +510,7 @@ const EXPLICACIONES = {
                 </ul>
             </div>
             <div style="margin-top: 2rem; text-align: center;">
-                <button class="action-btn" onclick="cambiarModo('multiplicar')">Practicar Tablas</button>
+                <button class="action-btn" onclick="cambiarModo('generador-tablas')">Practicar Tablas</button>
             </div>
         `
     },
@@ -595,6 +621,61 @@ const EXPLICACIONES = {
                 <p>3. Ponemos la coma en el 7800 contando 3 lugares desde la derecha:</p>
                 <p class="math-example">7 . 8 0 0</p>
                 <p><strong>Resultado: 7.8</strong></p>
+            </div>
+        `
+    },
+    'N': {
+        titulo: "Números Naturales (N)",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>¿Qué son?</h4>
+                <p>Son los números que usamos para contar cosas: 0, 1, 2, 3, 4, 5...</p>
+                <p>Se representan con la letra <strong>N</strong>.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>Operaciones</h4>
+                <p>Con ellos podemos sumar, restar (si el primero es mayor), multiplicar y dividir.</p>
+            </div>
+        `
+    },
+    'Z': {
+        titulo: "Números Enteros (Z)",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>Más allá del cero</h4>
+                <p>Incluyen a los naturales y a sus opuestos negativos: ...-3, -2, -1, 0, 1, 2, 3...</p>
+                <p>Se usan para medir temperaturas bajo cero, deudas o profundidades.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>⚠️ Ley de Signos (Multiplicación y División)</h4>
+                <ul>
+                    <li><strong>(+) × (+) = (+)</strong> (Amigo de mi amigo es mi amigo)</li>
+                    <li><strong>(-) × (-) = (+)</strong> (Enemigo de mi enemigo es mi amigo)</li>
+                    <li><strong>(+) × (-) = (-)</strong> (Amigo de mi enemigo es mi enemigo)</li>
+                    <li><strong>(-) × (+) = (-)</strong> (Enemigo de mi amigo es mi enemigo)</li>
+                </ul>
+                <p>Ejemplo: (-5) × (-3) = 15</p>
+            </div>
+        `
+    },
+    'Q': {
+        titulo: "Números Racionales (Q)",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>Partes de un todo</h4>
+                <p>Son números que se pueden escribir como fracción (a/b). Incluyen decimales y enteros.</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>Multiplicación de Fracciones</h4>
+                <p>¡Es la más fácil! Se multiplica directo:</p>
+                <p class="math-example">(a/b) × (c/d) = (a×c) / (b×d)</p>
+                <p>Ejemplo: (2/3) × (1/5) = 2/15</p>
+            </div>
+            <div class="explicacion-step">
+                <h4>División de Fracciones</h4>
+                <p>Multiplicamos en cruz (o "la oreja"):</p>
+                <p class="math-example">(a/b) ÷ (c/d) = (a×d) / (b×c)</p>
+                <p>Ejemplo: (1/2) ÷ (3/4) = 4/6</p>
             </div>
         `
     },
@@ -765,7 +846,7 @@ const App = {
         });
         
         // Inicializar vista
-        // (Opcional: cargar estado previo si existiera persistencia)
+        UI.changeMode('home');
     },
 
     handleKeydown: (e) => {
@@ -775,7 +856,7 @@ const App = {
             else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); Calculator.equals(); }
             else if (e.key === 'Escape') Calculator.clear();
             else if (e.key === 'Backspace') Calculator.backspace();
-        } else if (state.mode === 'multiplicar' && e.key === 'Enter') {
+        } else if (state.mode === 'generador-tablas' && e.key === 'Enter') {
             if (document.activeElement === DOM.inputs.numero) App.generate();
         }
     },
@@ -802,7 +883,7 @@ const App = {
 
     goToExplanation: () => {
         let topic = null;
-        if (state.mode === 'multiplicar') topic = 'multiplicar';
+        if (state.mode === 'generador-tablas') topic = 'multiplicar';
         else if (state.mode === 'dividir') topic = state.math.difficulty.division;
         else if (state.mode === 'multiplicar-gen') topic = 'm' + state.math.difficulty.multiplication;
         
@@ -821,7 +902,7 @@ const App = {
         const { mode } = state;
         let html = '';
 
-        if (mode === 'multiplicar') {
+        if (mode === 'generador-tablas') {
             const num = DOM.inputs.numero.value;
             if (!num) { 
                 window.notifications.show('Por favor ingresa un número', 'error'); 
@@ -872,6 +953,8 @@ const App = {
 };
 
 // Inicialización
+window.UI = UI; // Expose UI globally
+window.DOM = DOM; // Expose DOM globally
 App.init();
 
 // Funciones Globales (Bridge para onclicks en HTML)
@@ -887,6 +970,7 @@ window.irAPracticaDivision = (n) => App.goToPractice('division', n);
 window.irAPracticaMultiplicacion = (n) => App.goToPractice('multiplication', n);
 window.mostrarTemasDivision = UI.showDivisionTopics;
 window.mostrarTemasMultiplicacion = UI.showMultiplicationTopics; // Nueva función global
+window.mostrarTemasConjuntos = UI.showSetsTopics; // Nueva función global
 window.volverANiveles = UI.backToLevels; // Nueva función global
 
 // Bridge Calculadora
