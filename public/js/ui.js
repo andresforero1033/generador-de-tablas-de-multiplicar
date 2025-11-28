@@ -199,10 +199,108 @@ class ModalSystem {
     }
 }
 
+class TourManager {
+    constructor() {
+        // Check if driver is loaded
+        if (!window.driver) return;
+        
+        this.driver = window.driver.js.driver;
+        this.tourObj = this.driver({
+            showProgress: true,
+            animate: true,
+            steps: [
+                { 
+                    element: '#sidebar', 
+                    popover: { 
+                        title: 'Menú de Navegación', 
+                        description: 'Usa este menú lateral para acceder a todas las secciones de la aplicación.',
+                        side: "right", 
+                        align: 'start' 
+                    } 
+                },
+                { 
+                    element: '#menu-perfil', 
+                    popover: { 
+                        title: 'Tu Perfil', 
+                        description: 'Aquí puedes personalizar tu avatar, cambiar tu nombre y ver tus logros (estrellas y trofeos).',
+                        side: "right", 
+                        align: 'center' 
+                    } 
+                },
+                { 
+                    element: '#menu-multiplicar', 
+                    popover: { 
+                        title: 'Módulos de Aprendizaje', 
+                        description: 'Accede a los módulos de Suma, Resta, Multiplicación y División. ¡Es el corazón de la app!',
+                        side: "right", 
+                        align: 'center' 
+                    } 
+                },
+                { 
+                    element: '#menu-herramientas', 
+                    popover: { 
+                        title: 'Herramientas', 
+                        description: 'Utilidades extra como la Calculadora y el Generador de Tablas.',
+                        side: "right", 
+                        align: 'center' 
+                    } 
+                },
+                { 
+                    element: '#menu-aprendizaje', 
+                    popover: { 
+                        title: 'Material Teórico', 
+                        description: 'Repasa conceptos, trucos y guías paso a paso.',
+                        side: "right", 
+                        align: 'center' 
+                    } 
+                },
+                { 
+                    element: '.module-tabs', 
+                    popover: { 
+                        title: 'Dentro de un Módulo', 
+                        description: 'Cada módulo tiene 4 secciones:<br>1. <b>Explicación:</b> Aprende la teoría.<br>2. <b>Generador:</b> Ejercicios libres.<br>3. <b>Práctica:</b> Ejercicios puntuados.<br>4. <b>Examen:</b> ¡Ponte a prueba!',
+                        side: "bottom", 
+                        align: 'center' 
+                    },
+                    onHighlightStarted: () => {
+                        // Force switch to multiplication module to show tabs
+                        if (window.ModuleManager) {
+                            window.ModuleManager.switchModule('multiplication');
+                        }
+                    }
+                }
+            ],
+            onDestroyed: () => {
+                localStorage.setItem('tourCompleted', 'true');
+                // Optional: Return to home after tour
+                if (window.UI) window.UI.changeMode('home');
+            }
+        });
+    }
+
+    start() {
+        if (!window.driver) return;
+        
+        // Only start if not completed yet
+        if (!localStorage.getItem('tourCompleted')) {
+            // Small delay to ensure UI is ready
+            setTimeout(() => {
+                this.tourObj.drive();
+            }, 1500);
+        }
+    }
+    
+    forceStart() {
+        if (!window.driver) return;
+        this.tourObj.drive();
+    }
+}
+
 // Initialize Global Instances
 window.sounds = new SoundManager();
 window.notifications = new NotificationSystem();
 window.modals = new ModalSystem();
+window.tour = new TourManager();
 
 // Add interaction listener to unlock AudioContext
 document.addEventListener('click', () => {

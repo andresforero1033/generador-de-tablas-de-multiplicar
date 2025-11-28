@@ -44,7 +44,20 @@ const ProfileManager = {
         const levelEl = document.getElementById('profile-level');
         
         if(avatarEl) avatarEl.textContent = avatar;
-        if(nameEl) nameEl.textContent = name;
+        // Only update text if not in edit mode (checking if it has an input child)
+        if(nameEl && !nameEl.querySelector('input')) {
+            nameEl.textContent = name;
+            // Add edit button if not present
+            if (!document.getElementById('edit-name-btn')) {
+                const editBtn = document.createElement('button');
+                editBtn.id = 'edit-name-btn';
+                editBtn.className = 'edit-name-btn';
+                editBtn.innerHTML = '✏️';
+                editBtn.onclick = ProfileManager.toggleNameEdit;
+                editBtn.title = "Cambiar Nombre";
+                nameEl.appendChild(editBtn);
+            }
+        }
         if(levelEl) levelEl.textContent = level;
 
         // Update Stats
@@ -82,6 +95,42 @@ const ProfileManager = {
             `;
         });
         container.innerHTML = html;
+    },
+
+    toggleNameEdit: () => {
+        const nameEl = document.getElementById('profile-name');
+        if (!nameEl) return;
+        
+        const currentName = ProfileManager.data.name;
+        
+        // Switch to edit mode
+        nameEl.innerHTML = `
+            <input type="text" id="profile-name-input" value="${currentName}" class="profile-name-input"
+                   onblur="ProfileManager.saveName(this.value)" 
+                   onkeydown="if(event.key === 'Enter') ProfileManager.saveName(this.value)">
+        `;
+        
+        setTimeout(() => {
+            const input = document.getElementById('profile-name-input');
+            if(input) {
+                input.focus();
+                input.select();
+            }
+        }, 50);
+    },
+
+    saveName: (newName) => {
+        if (newName && newName.trim() !== '') {
+            ProfileManager.data.name = newName.trim();
+            ProfileManager.saveData();
+            window.notifications.show('Nombre actualizado', 'success');
+        }
+        
+        // Force exit edit mode by clearing the element content
+        const nameEl = document.getElementById('profile-name');
+        if (nameEl) nameEl.innerHTML = ''; 
+        
+        ProfileManager.renderProfile();
     },
 
     toggleAvatarSelector: () => {

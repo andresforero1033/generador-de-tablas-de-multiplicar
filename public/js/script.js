@@ -859,6 +859,11 @@ const App = {
         
         // Inicializar vista
         UI.changeMode('home');
+        
+        // Iniciar Tour si es necesario
+        if (window.tour) {
+            window.tour.start();
+        }
     },
 
     handleKeydown: (e) => {

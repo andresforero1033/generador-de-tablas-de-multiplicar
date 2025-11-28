@@ -7,7 +7,9 @@
     <title>Creative BY Mariana - Matemáticas Divertidas</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <script>
         // Protección de ruta
         if (!localStorage.getItem('token')) {
@@ -110,7 +112,7 @@
                             <p>Domina la resta y la ley de signos.</p>
                         </article>
 
-                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('multiplication')" role="button" tabindex="0">
+                        <article class="card dashboard-card" id="tour-card-modules" onclick="ModuleManager.switchModule('multiplication')" role="button" tabindex="0">
                             <div class="card-icon">✖️</div>
                             <h3>Multiplicación</h3>
                             <p>Aprende, practica y evalúate en las tablas de multiplicar.</p>
@@ -122,13 +124,13 @@
                             <p>Domina la división con ejercicios paso a paso.</p>
                         </article>
 
-                        <article class="card dashboard-card" onclick="cambiarModo('herramientas')" role="button" tabindex="0">
+                        <article class="card dashboard-card" id="tour-card-tools" onclick="cambiarModo('herramientas')" role="button" tabindex="0">
                             <div class="card-icon">🛠️</div>
                             <h3>Herramientas</h3>
                             <p>Calculadora y Generador de Tablas personalizadas.</p>
                         </article>
 
-                        <article class="card dashboard-card" onclick="cambiarModo('aprendizaje')" role="button" tabindex="0">
+                        <article class="card dashboard-card" id="tour-card-learning" onclick="cambiarModo('aprendizaje')" role="button" tabindex="0">
                             <div class="card-icon">📚</div>
                             <h3>Aprendizaje</h3>
                             <p>Material teórico sobre conjuntos numéricos y operaciones.</p>
