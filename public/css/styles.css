@@ -2002,6 +2002,48 @@ body.dark-mode .toast-message {
     border: 1px solid var(--color-border);
 }
 
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 16px;
+    background: var(--color-bg-input);
+    transition: all 0.3s;
+    position: relative;
+}
+
+.badge.locked {
+    opacity: 0.6;
+    filter: grayscale(1);
+}
+
+.badge.unlocked {
+    background: linear-gradient(135deg, #fff 0%, #f0f2f5 100%);
+    border: 2px solid var(--color-accent);
+    box-shadow: 0 8px 20px rgba(0, 184, 148, 0.2);
+    transform: scale(1.05);
+}
+
+.badge-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.badge span {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text-main);
+}
+
 /* Profile Name Edit Styles */
 .edit-name-btn {
     background: rgba(255, 255, 255, 0.2);
