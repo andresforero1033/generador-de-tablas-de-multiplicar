@@ -16,17 +16,36 @@
                 <span class="brand-subtitle">BY Mariana</span>
             </div>
         </h1>
-        <div class="auth-container">
-            <h2 id="form-title">Iniciar Sesión</h2>
-            <div id="error-message" class="error-msg"></div>
-            
-            <form id="auth-form" class="auth-form">
-                <input type="text" id="username" placeholder="Usuario" required>
-                <input type="password" id="password" placeholder="Contraseña" required>
-                <button type="submit" class="action-btn">Entrar</button>
-            </form>
-            
-            <span id="toggle-auth" class="toggle-link">¿No tienes cuenta? Regístrate</span>
+        <div class="auth-perspective">
+            <div class="auth-card-3d" id="auth-card">
+                <!-- Cara Frontal: Login -->
+                <div class="auth-face auth-front">
+                    <h2>Iniciar Sesión</h2>
+                    <div id="login-error" class="error-msg"></div>
+                    
+                    <form id="login-form" class="auth-form">
+                        <input type="text" id="login-username" placeholder="Usuario" required>
+                        <input type="password" id="login-password" placeholder="Contraseña" required>
+                        <button type="submit" class="action-btn">Entrar</button>
+                    </form>
+                    
+                    <span id="to-register" class="toggle-link">¿No tienes cuenta? Regístrate</span>
+                </div>
+
+                <!-- Cara Trasera: Registro -->
+                <div class="auth-face auth-back">
+                    <h2>Crear Cuenta</h2>
+                    <div id="register-error" class="error-msg"></div>
+                    
+                    <form id="register-form" class="auth-form">
+                        <input type="text" id="register-username" placeholder="Elige un Usuario" required>
+                        <input type="password" id="register-password" placeholder="Elige una Contraseña" required>
+                        <button type="submit" class="action-btn btn-success">Registrarse</button>
+                    </form>
+                    
+                    <span id="to-login" class="toggle-link">¿Ya tienes cuenta? Inicia Sesión</span>
+                </div>
+            </div>
         </div>
     </div>
 

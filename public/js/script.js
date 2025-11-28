@@ -397,7 +397,7 @@ const UI = {
         // Configuración específica por modo
         switch(mode) {
             case 'home':
-                DOM.text.titulo.textContent = 'Bienvenido a Creative BY Mariana';
+                DOM.text.titulo.textContent = 'Bienvenido a Creative';
                 UI.toggleElement(DOM.containers.home, true);
                 break;
             case 'perfil':

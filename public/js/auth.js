@@ -23,66 +23,155 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const authForm = document.getElementById('auth-form');
-    const formTitle = document.getElementById('form-title');
-    const toggleAuth = document.getElementById('toggle-auth');
-    const errorMessage = document.getElementById('error-message');
-    const submitBtn = authForm.querySelector('button');
+    // 3D Flip Logic
+    const authCard = document.getElementById('auth-card');
+    const toRegisterBtn = document.getElementById('to-register');
+    const toLoginBtn = document.getElementById('to-login');
+    
+    // Forms
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    // Error Messages
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
 
-    let isLogin = true;
+    // Toggle Flip
+    if (toRegisterBtn && authCard) {
+        toRegisterBtn.addEventListener('click', () => {
+            authCard.classList.add('flipped');
+            if (window.sounds) window.sounds.playWhoosh();
+            // Limpiar errores al cambiar
+            if (loginError) loginError.style.display = 'none';
+            if (registerError) registerError.style.display = 'none';
+        });
+    }
 
-    toggleAuth.addEventListener('click', () => {
-        isLogin = !isLogin;
-        if (isLogin) {
-            formTitle.textContent = 'Iniciar Sesión';
-            submitBtn.textContent = 'Entrar';
-            toggleAuth.textContent = '¿No tienes cuenta? Regístrate';
-        } else {
-            formTitle.textContent = 'Registrarse';
-            submitBtn.textContent = 'Crear Cuenta';
-            toggleAuth.textContent = '¿Ya tienes cuenta? Inicia Sesión';
-        }
-        errorMessage.style.display = 'none';
-    });
+    if (toLoginBtn && authCard) {
+        toLoginBtn.addEventListener('click', () => {
+            authCard.classList.remove('flipped');
+            if (window.sounds) window.sounds.playWhoosh();
+            // Limpiar errores al cambiar
+            if (loginError) loginError.style.display = 'none';
+            if (registerError) registerError.style.display = 'none';
+        });
+    }
 
-    authForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        const endpoint = isLogin ? '/api/login' : '/api/register';
-        
-        try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+    // Handle Login
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
             
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || 'Error en la solicitud');
-            }
-            
-            if (isLogin) {
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error en el inicio de sesión');
+                }
+                
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.username);
-                window.notifications.show('¡Bienvenido!', 'success');
+                
+                if (window.notifications) window.notifications.show('¡Bienvenido!', 'success');
+                
                 setTimeout(() => {
                     window.location.href = '/app';
                 }, 1000);
-            } else {
-                window.notifications.show('Registro exitoso. Por favor inicia sesión.', 'success');
-                // Cambiar a vista de login
-                toggleAuth.click();
+                
+            } catch (error) {
+                if (window.notifications) window.notifications.show(error.message, 'error');
+                if (loginError) {
+                    loginError.textContent = error.message;
+                    loginError.style.display = 'block';
+                }
+                if (window.sounds) window.sounds.playError();
+            }
+        });
+    }
+
+    // Handle Register
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Error en el registro');
+                }
+                
+                if (window.notifications) window.notifications.show('Registro exitoso. Por favor inicia sesión.', 'success');
+                
+                // Volver a la cara frontal (Login)
+                if (authCard) authCard.classList.remove('flipped');
+                
+                // Pre-llenar el usuario en login para conveniencia
+                const loginUser = document.getElementById('login-username');
+                const loginPass = document.getElementById('login-password');
+                if (loginUser) loginUser.value = username;
+                if (loginPass) loginPass.focus();
+                
+            } catch (error) {
+                if (window.notifications) window.notifications.show(error.message, 'error');
+                if (registerError) {
+                    registerError.textContent = error.message;
+                    registerError.style.display = 'block';
+                }
+                if (window.sounds) window.sounds.playError();
+            }
+        });
+    }
+
+    // Swipe Gesture Logic for Mobile
+    if (authCard) {
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        authCard.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        authCard.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        const handleSwipe = () => {
+            const swipeThreshold = 50; // Minimum distance for swipe
+            const diff = touchEndX - touchStartX;
+
+            // Swipe Left (Login -> Register)
+            if (diff < -swipeThreshold && !authCard.classList.contains('flipped')) {
+                authCard.classList.add('flipped');
+                if (window.sounds) window.sounds.playWhoosh();
+                if (loginError) loginError.style.display = 'none';
+                if (registerError) registerError.style.display = 'none';
             }
             
-        } catch (error) {
-            window.notifications.show(error.message, 'error');
-            errorMessage.textContent = error.message;
-            errorMessage.style.display = 'block';
-            window.sounds.playError();
-        }
-    });
+            // Swipe Right (Register -> Login)
+            if (diff > swipeThreshold && authCard.classList.contains('flipped')) {
+                authCard.classList.remove('flipped');
+                if (window.sounds) window.sounds.playWhoosh();
+                if (loginError) loginError.style.display = 'none';
+                if (registerError) registerError.style.display = 'none';
+            }
+        };
+    }
 });

@@ -407,6 +407,26 @@ body {
     align-items: center;
 }
 
+.header-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.header-actions .theme-toggle-btn {
+    margin: 0;
+}
+
+.sidebar.collapsed .header-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
 .sidebar header h2 {
     margin-top: 0;
     margin-bottom: var(--spacing-md);
@@ -842,6 +862,7 @@ select:focus {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--spacing-md);
     margin-top: var(--spacing-md);
+    perspective: 1000px; /* Añadido para efecto 3D en hover */
 }
 
 .card {
@@ -850,16 +871,17 @@ select:focus {
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.3s ease;
     border: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transform-style: preserve-3d;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--box-shadow-hover);
+    transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
     border-color: var(--color-primary);
 }
 
@@ -1188,6 +1210,71 @@ select:focus {
     font-size: 1.2rem;
     font-weight: 400;
     margin-top: 0;
+}
+
+/* =========================================
+   3D Flip Effect for Auth
+   ========================================= */
+.auth-perspective {
+    perspective: 1000px;
+    width: 100%;
+    max-width: 420px;
+    /* Eliminamos min-height fijo para que se adapte, 
+       pero necesitamos asegurar espacio */
+    position: relative;
+    margin: 0 auto;
+}
+
+.auth-card-3d {
+    position: relative;
+    width: 100%;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.auth-card-3d.flipped {
+    transform: rotateY(180deg);
+}
+
+.auth-face {
+    width: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    
+    /* Para que ambas caras ocupen el mismo espacio visualmente,
+       la trasera debe ser absoluta, pero eso colapsa la altura del padre.
+       Usaremos Grid para superponerlas limpiamente. */
+}
+
+/* Solución Grid para superposición sin absolute (mantiene altura automática) */
+.auth-card-3d {
+    display: grid;
+    grid-template-areas: "card";
+}
+
+.auth-face {
+    grid-area: card;
+}
+
+.auth-front {
+    transform: rotateY(0deg);
+    z-index: 2;
+}
+
+.auth-back {
+    transform: rotateY(180deg);
+}
+
+/* Ajustes para el contenido dentro de las caras */
+.auth-face h2 {
+    margin-top: 0;
+    color: var(--color-text-muted);
 }
 
 /* =========================================
@@ -1769,6 +1856,9 @@ body.dark-mode .toast-message {
 
 .avatar-section {
     position: relative;
+    z-index: 10; /* Much higher to be safe */
+    display: inline-block; /* Ensure it wraps the avatar tightly */
+    margin: 0 auto;
 }
 
 .current-avatar {
@@ -1782,27 +1872,26 @@ body.dark-mode .toast-message {
     justify-content: center;
     box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     border: 4px solid rgba(255,255,255,0.5);
+    position: relative; /* For z-index context if needed */
 }
 
 .edit-avatar-btn {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 5px; /* Lift it up a bit */
+    right: -5px; /* Push it out a bit */
     background: var(--color-accent);
-    border: none;
-    width: 36px;
-    height: 36px;
+    border: 2px solid white; /* Add border to separate from avatar */
+    width: 44px; /* Even larger touch target */
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     transition: transform 0.2s;
-}
-
-.edit-avatar-btn:hover {
-    transform: scale(1.1);
+    z-index: 20; /* Highest priority */
+    padding: 0; /* Reset padding */
 }
 
 .user-info {

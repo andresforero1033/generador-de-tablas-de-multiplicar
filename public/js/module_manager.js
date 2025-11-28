@@ -86,7 +86,15 @@ const ProfileManager = {
 
     toggleAvatarSelector: () => {
         const selector = document.getElementById('avatar-selector');
-        if (selector) selector.classList.toggle('u-hidden');
+        if (selector) {
+            selector.classList.toggle('u-hidden');
+            if (!selector.classList.contains('u-hidden')) {
+                // Scroll to selector to ensure visibility on mobile
+                setTimeout(() => {
+                    selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
     },
 
     setAvatar: (emoji) => {

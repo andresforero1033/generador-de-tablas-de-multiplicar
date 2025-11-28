@@ -56,6 +56,42 @@ class SoundManager {
             this.playTone(400, 'sine', 0.1, 0.1);
         }
     }
+
+    playWhoosh() {
+        if (!this.enabled) return;
+        
+        // Create noise buffer
+        const duration = 0.4;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        // Filter for "air" sound
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(200, this.ctx.currentTime);
+        filter.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + duration / 2);
+        filter.frequency.linearRampToValueAtTime(200, this.ctx.currentTime + duration);
+
+        // Envelope
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + duration / 2);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start();
+    }
 }
 
 class NotificationSystem {
