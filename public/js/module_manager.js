@@ -244,6 +244,7 @@ const ModuleManager = {
             else if (moduleName === 'division') menuName = 'dividir';
             else if (moduleName === 'addition') menuName = 'sumar';
             else if (moduleName === 'subtraction') menuName = 'restar';
+            else if (moduleName === 'sets') menuName = 'conjuntos';
             
             UI.updateActiveMenu(menuName);
             
@@ -268,6 +269,7 @@ const ModuleManager = {
         else if (moduleName === 'division') title = 'Módulo de División';
         else if (moduleName === 'addition') title = 'Módulo de Suma';
         else if (moduleName === 'subtraction') title = 'Módulo de Resta';
+        else if (moduleName === 'sets') title = 'Módulo de Conjuntos';
 
         document.getElementById('module-title').textContent = title;
         
@@ -304,6 +306,12 @@ const ModuleManager = {
     renderExplanation: () => {
         const container = document.getElementById('explanation-content');
         const mod = ModuleManager.currentModule;
+        
+        if (mod === 'sets') {
+            ModuleManager.renderSetsExplanation(container);
+            return;
+        }
+
         let title = '';
         let opSymbol = '';
         
@@ -378,11 +386,155 @@ const ModuleManager = {
     renderGenerator: () => {
         // Setup Generator UI if not already set
         const container = document.getElementById('generator-content');
-        // We assume the HTML structure exists, we just bind logic
-        // But for this refactor, let's inject the controls dynamically to ensure they match
+        
+        if (ModuleManager.currentModule === 'sets') {
+            // Custom UI for Sets Generator
+            const controls = document.querySelector('#section-generador .generator-controls');
+            if (controls) {
+                controls.innerHTML = `
+                    <div class="sets-controls-group">
+                        <div class="control-row">
+                            <label>Tipo:</label>
+                            <select id="gen-set-type">
+                                <option value="numbers">Números</option>
+                                <option value="letters">Letras</option>
+                                <option value="words">Palabras</option>
+                                <option value="mixed">Mixto</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>Tamaño:</label>
+                            <select id="gen-set-size">
+                                <option value="3">3 Elementos</option>
+                                <option value="5" selected>5 Elementos</option>
+                                <option value="8">8 Elementos</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>Cantidad:</label>
+                            <select id="gen-set-count" onchange="ModuleManager.updateSetInputs()">
+                                <option value="1">1 Conjunto (A)</option>
+                                <option value="2">2 Conjuntos (A, B)</option>
+                                <option value="3">3 Conjuntos (A, B, C)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="manual-sets-inputs" class="manual-sets-inputs">
+                        <!-- Inputs injected here -->
+                    </div>
+                    <div class="sets-actions">
+                        <button class="action-btn" onclick="ModuleManager.generateSingle()">🎲 Generar Aleatorio</button>
+                        <button class="action-btn btn-info" onclick="ModuleManager.verifyAndGraphSets()">📊 Verificar y Graficar</button>
+                    </div>
+                `;
+                ModuleManager.updateSetInputs();
+            }
+            // Hide result/steps buttons as they might not be relevant or need adaptation
+            document.querySelector('.gen-actions').classList.add('u-hidden');
+            return;
+        }
+
+        // Default UI for other modules (restore if needed)
+        const controls = document.querySelector('#section-generador .generator-controls');
+        if (controls && !document.getElementById('gen-type')) {
+             controls.innerHTML = `
+                <select id="gen-type">
+                    <option value="N">Naturales (N)</option>
+                    <option value="Z">Enteros (Z)</option>
+                    <option value="Q">Racionales (Q)</option>
+                </select>
+                <select id="gen-diff">
+                    <option value="1">Nivel 1</option>
+                    <option value="2">Nivel 2</option>
+                    <option value="3">Nivel 3</option>
+                </select>
+                <button class="action-btn" onclick="ModuleManager.generateSingle()">Generar</button>
+            `;
+            document.querySelector('.gen-actions').classList.remove('u-hidden');
+        }
     },
 
     generateSingle: () => {
+        if (ModuleManager.currentModule === 'sets') {
+            const type = document.getElementById('gen-set-type').value;
+            const size = parseInt(document.getElementById('gen-set-size').value);
+            const count = parseInt(document.getElementById('gen-set-count').value);
+            
+            const display = document.getElementById('gen-display');
+            let html = '<div class="gen-problem" style="text-align: left; display: inline-block;">';
+            
+            const labels = ['A', 'B', 'C'];
+            const sets = [];
+
+            // Pick a category for all sets if type is words to ensure relevance
+            let category = null;
+            if (type === 'words') {
+                const keys = Object.keys(MathCore.categories);
+                category = keys[MathCore.randomInt(0, keys.length - 1)];
+                html += `<div style="margin-bottom: 1rem; color: var(--color-accent-dark); font-weight: bold;">Tema: ${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
+            }
+            
+            for(let i=0; i<count; i++) {
+                const set = MathCore.generateRandomSet(type, size, category);
+                sets.push(set);
+                html += `
+                    <div style="margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem; color: var(--color-text-muted);">${labels[i]} = </span>
+                        <strong style="font-size: 2rem; color: var(--color-primary);">{ ${set.join(', ')} }</strong>
+                    </div>
+                `;
+            }
+
+            // Calculate Intersections if count > 1
+            if (count >= 2) {
+                html += '<div class="sets-intersections" style="margin-top: 2rem; border-top: 1px solid var(--color-border); padding-top: 1rem;">';
+                html += '<h4 style="color: var(--color-text-muted); margin-bottom: 1rem;">Intersecciones:</h4>';
+                
+                // A ∩ B
+                const AnB = MathCore.solveSetOperation(sets[0], sets[1], 'intersection').result;
+                html += `
+                    <div style="margin-bottom: 0.5rem;">
+                        <span style="font-weight: bold;">A ∩ B = </span>
+                        <span>{ ${AnB.length ? AnB.join(', ') : '∅'} }</span>
+                    </div>
+                `;
+
+                if (count === 3) {
+                    // A ∩ C
+                    const AnC = MathCore.solveSetOperation(sets[0], sets[2], 'intersection').result;
+                    html += `
+                        <div style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold;">A ∩ C = </span>
+                            <span>{ ${AnC.length ? AnC.join(', ') : '∅'} }</span>
+                        </div>
+                    `;
+
+                    // B ∩ C
+                    const BnC = MathCore.solveSetOperation(sets[1], sets[2], 'intersection').result;
+                    html += `
+                        <div style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold;">B ∩ C = </span>
+                            <span>{ ${BnC.length ? BnC.join(', ') : '∅'} }</span>
+                        </div>
+                    `;
+
+                    // A ∩ B ∩ C
+                    const AnBnC = MathCore.solveSetOperation(AnB, sets[2], 'intersection').result;
+                    html += `
+                        <div style="margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold;">A ∩ B ∩ C = </span>
+                            <span>{ ${AnBnC.length ? AnBnC.join(', ') : '∅'} }</span>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+            }
+
+            html += '</div>';
+            display.innerHTML = html;
+            return;
+        }
+
         const type = document.getElementById('gen-type').value;
         const diff = parseInt(document.getElementById('gen-diff').value);
         const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
@@ -438,7 +590,12 @@ const ModuleManager = {
             results: [],
             score: 0
         };
-        ModuleManager.newPracticeQuestion();
+
+        if (ModuleManager.currentModule === 'sets') {
+            ModuleManager.newSetPracticeQuestion();
+        } else {
+            ModuleManager.newPracticeQuestion();
+        }
     },
 
     newPracticeQuestion: () => {
@@ -617,22 +774,43 @@ const ModuleManager = {
     // ==========================================
     renderWorkshops: () => {
         const container = document.getElementById('section-talleres');
+        
+        let controlsHtml = '';
+        if (ModuleManager.currentModule === 'sets') {
+            controlsHtml = `
+                <select id="ws-type">
+                    <option value="mixed">Mixto (Números/Letras/Palabras)</option>
+                    <option value="numbers">Números</option>
+                    <option value="letters">Letras</option>
+                    <option value="words">Palabras (Temático)</option>
+                </select>
+                <select id="ws-diff">
+                    <option value="2">2 Conjuntos (A, B)</option>
+                    <option value="3">3 Conjuntos (A, B, C)</option>
+                </select>
+            `;
+        } else {
+            controlsHtml = `
+                <select id="ws-type">
+                    <option value="ALL">Todos (N, Z, Q)</option>
+                    <option value="N">Naturales (N)</option>
+                    <option value="Z">Enteros (Z)</option>
+                    <option value="Q">Racionales (Q)</option>
+                </select>
+                <select id="ws-diff">
+                    <option value="1">Nivel 1 (Básico)</option>
+                    <option value="2">Nivel 2 (Intermedio)</option>
+                    <option value="3">Nivel 3 (Avanzado)</option>
+                </select>
+            `;
+        }
+
         container.innerHTML = `
             <div class="workshop-setup">
                 <h3>Generador de Talleres</h3>
                 <p>Crea una lista de ejercicios para resolver en tu cuaderno.</p>
                 <div class="generator-controls">
-                    <select id="ws-type">
-                        <option value="ALL">Todos (N, Z, Q)</option>
-                        <option value="N">Naturales (N)</option>
-                        <option value="Z">Enteros (Z)</option>
-                        <option value="Q">Racionales (Q)</option>
-                    </select>
-                    <select id="ws-diff">
-                        <option value="1">Nivel 1 (Básico)</option>
-                        <option value="2">Nivel 2 (Intermedio)</option>
-                        <option value="3">Nivel 3 (Avanzado)</option>
-                    </select>
+                    ${controlsHtml}
                     <button class="action-btn" onclick="ModuleManager.generateWorkshop()">Generar Taller</button>
                 </div>
                 <div id="workshop-output" class="workshop-grid u-hidden"></div>
@@ -647,26 +825,87 @@ const ModuleManager = {
         
         let html = '<h4>Ejercicios Propuestos</h4><div class="workshop-list">';
         
-        for(let i=0; i<10; i++) {
-            let type = typeSel;
-            if (type === 'ALL') {
-                const types = ['N', 'Z', 'Q'];
-                type = types[MathCore.randomInt(0, 2)];
+        if (ModuleManager.currentModule === 'sets') {
+            // Sets Workshop Generation
+            for(let i=0; i<5; i++) { // 5 exercises for sets as they are larger
+                const numSets = diff; // 2 or 3 sets
+                const setType = typeSel === 'mixed' ? 
+                    ['numbers', 'letters', 'words'][MathCore.randomInt(0, 2)] : typeSel;
+                
+                let category = null;
+                let categoryTitle = '';
+                if (setType === 'words') {
+                    const keys = Object.keys(MathCore.categories);
+                    category = keys[MathCore.randomInt(0, keys.length - 1)];
+                    categoryTitle = `(Tema: ${category.charAt(0).toUpperCase() + category.slice(1)})`;
+                }
+
+                const setA = MathCore.generateRandomSet(setType, 5, category);
+                const setB = MathCore.generateRandomSet(setType, 5, category);
+                const setC = numSets === 3 ? MathCore.generateRandomSet(setType, 5, category) : null;
+
+                const ops = ['union', 'intersection', 'difference_a_b', 'difference_b_a'];
+                const op = ops[MathCore.randomInt(0, 3)];
+                
+                let opSymbol = '';
+                if (op === 'union') opSymbol = '∪';
+                else if (op === 'intersection') opSymbol = '∩';
+                else if (op === 'difference_a_b') opSymbol = '-';
+                else if (op === 'difference_b_a') opSymbol = '-'; // Special handling for display
+
+                let question = '';
+                if (numSets === 2) {
+                    if (op === 'difference_b_a') question = 'B - A';
+                    else if (op === 'difference_a_b') question = 'A - B';
+                    else question = `A ${opSymbol} B`;
+                } else {
+                    // For 3 sets, generate a slightly more complex question or just A op B
+                    // Let's keep it simple for workshop: A op B, or A op C
+                    const target2 = Math.random() > 0.5 ? 'C' : 'B';
+                    question = `A ${opSymbol} ${target2}`;
+                    if (Math.random() > 0.7) question = `(A ${opSymbol} B) ${opSymbol === '∪' ? '∩' : '∪'} C`; // Mix it up rarely
+                }
+
+                html += `
+                    <div class="ws-item sets-ws-item">
+                        <span class="ws-number">${i+1}.</span>
+                        <div class="ws-sets-content">
+                            ${categoryTitle ? `<div class="ws-sets-theme">${categoryTitle}</div>` : ''}
+                            <div class="ws-sets-data">
+                                <span><strong>A</strong> = {${setA.join(', ')}}</span>
+                                <span><strong>B</strong> = {${setB.join(', ')}}</span>
+                                ${setC ? `<span><strong>C</strong> = {${setC.join(', ')}}</span>` : ''}
+                            </div>
+                            <div class="ws-sets-question">
+                                Hallar: <strong>${question}</strong> = { __________________ }
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
-            
-            const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
-            let opSymbol = '';
-            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
-            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
-            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
-            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
-            
-            html += `
-                <div class="ws-item">
-                    <span class="ws-number">${i+1}.</span>
-                    ${MathCore.formatNumber(problem.a, type)} ${opSymbol} ${MathCore.formatNumber(problem.b, type)} = ______
-                </div>
-            `;
+        } else {
+            // Arithmetic Workshop Generation
+            for(let i=0; i<10; i++) {
+                let type = typeSel;
+                if (type === 'ALL') {
+                    const types = ['N', 'Z', 'Q'];
+                    type = types[MathCore.randomInt(0, 2)];
+                }
+                
+                const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
+                let opSymbol = '';
+                if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+                else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+                else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+                else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+                
+                html += `
+                    <div class="ws-item">
+                        <span class="ws-number">${i+1}.</span>
+                        ${MathCore.formatNumber(problem.a, type)} ${opSymbol} ${MathCore.formatNumber(problem.b, type)} = ______
+                    </div>
+                `;
+            }
         }
         
         html += '</div><button class="action-btn btn-secondary" onclick="window.print()">Imprimir / Guardar PDF</button>';
@@ -738,21 +977,34 @@ const ModuleManager = {
 
         // Generate Questions
         for(let i=0; i<count; i++) {
-            const types = ['N', 'Z', 'Q'];
-            const type = types[MathCore.randomInt(0, 2)];
-            
-            let diff;
-            if (diffVal === 'MIXED') {
-                diff = MathCore.randomInt(1, 3);
+            let problem, solution;
+
+            if (ModuleManager.currentModule === 'sets') {
+                const setA = MathCore.generateSet(4, 1, 10);
+                const setB = MathCore.generateSet(4, 5, 15);
+                const ops = ['union', 'intersection', 'difference_a_b', 'difference_b_a'];
+                const op = ops[MathCore.randomInt(0, 3)];
+                problem = { setA, setB, op, type: 'sets' };
+                solution = MathCore.solveSetOperation(setA, setB, op);
             } else {
-                diff = parseInt(diffVal);
+                const types = ['N', 'Z', 'Q'];
+                const type = types[MathCore.randomInt(0, 2)];
+                
+                let diff;
+                if (diffVal === 'MIXED') {
+                    diff = MathCore.randomInt(1, 3);
+                } else {
+                    diff = parseInt(diffVal);
+                }
+
+                problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
+                solution = MathCore.solve(problem);
             }
 
-            const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
             ModuleManager.state.exam.questions.push({
                 id: i,
                 problem,
-                solution: MathCore.solve(problem)
+                solution
             });
         }
 
@@ -823,26 +1075,50 @@ const ModuleManager = {
     renderCurrentQuestion: () => {
         const { questions, answers, currentQuestionIndex } = ModuleManager.state.exam;
         const q = questions[currentQuestionIndex];
-        let opSymbol = '';
-        if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
-        else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
-        else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
-        else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
-
-        const type = q.problem.type;
         const val = answers[currentQuestionIndex] || '';
-
         const area = document.getElementById('current-question-area');
-        area.innerHTML = `
-            <div class="current-q-number">Pregunta ${currentQuestionIndex + 1}</div>
-            <div class="current-q-text">
-                ${MathCore.formatNumber(q.problem.a, type)} ${opSymbol} ${MathCore.formatNumber(q.problem.b, type)}
-            </div>
-            <input type="text" class="exam-input-large" 
-                   value="${val}" 
-                   oninput="ModuleManager.saveExamAnswer(${currentQuestionIndex}, this.value)"
-                   placeholder="?" autofocus>
-        `;
+
+        if (q.problem.type === 'sets') {
+            const { setA, setB, op } = q.problem;
+            let opTitle = '';
+            if (op === 'union') opTitle = 'A ∪ B';
+            else if (op === 'intersection') opTitle = 'A ∩ B';
+            else if (op === 'difference_a_b') opTitle = 'A - B';
+            else if (op === 'difference_b_a') opTitle = 'B - A';
+
+            area.innerHTML = `
+                <div class="current-q-number">Pregunta ${currentQuestionIndex + 1}</div>
+                <div class="sets-display" style="font-size: 1.5rem;">
+                    <p><strong>A</strong> = {${setA.join(', ')}}</p>
+                    <p><strong>B</strong> = {${setB.join(', ')}}</p>
+                </div>
+                <div class="current-q-text" style="font-size: 2.5rem; margin-bottom: 1rem;">
+                    ${opTitle}
+                </div>
+                <input type="text" class="exam-input-large" 
+                       value="${val}" 
+                       oninput="ModuleManager.saveExamAnswer(${currentQuestionIndex}, this.value)"
+                       placeholder="Ej: 1, 2, 3" autofocus>
+            `;
+        } else {
+            let opSymbol = '';
+            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+
+            const type = q.problem.type;
+            area.innerHTML = `
+                <div class="current-q-number">Pregunta ${currentQuestionIndex + 1}</div>
+                <div class="current-q-text">
+                    ${MathCore.formatNumber(q.problem.a, type)} ${opSymbol} ${MathCore.formatNumber(q.problem.b, type)}
+                </div>
+                <input type="text" class="exam-input-large" 
+                       value="${val}" 
+                       oninput="ModuleManager.saveExamAnswer(${currentQuestionIndex}, this.value)"
+                       placeholder="?" autofocus>
+            `;
+        }
         
         // Focus input
         setTimeout(() => {
@@ -911,7 +1187,14 @@ const ModuleManager = {
             const type = q.problem.type;
             
             let isCorrect = false;
-            if (type === 'Q') {
+            if (type === 'sets') {
+                // Parse user input for sets
+                const userNums = input.split(',')
+                    .map(s => parseInt(s.trim()))
+                    .filter(n => !isNaN(n))
+                    .sort((a, b) => a - b);
+                isCorrect = JSON.stringify(userNums) === JSON.stringify(correct);
+            } else if (type === 'Q') {
                 isCorrect = input === `${correct.num}/${correct.den}`;
             } else {
                 isCorrect = parseFloat(input) == parseFloat(correct);
@@ -964,19 +1247,35 @@ const ModuleManager = {
 
         const { questions, answers } = ModuleManager.state.exam;
         questions.forEach((q, i) => {
-            let opSymbol = '';
-            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
-            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
-            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
-            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+            let questionText = '';
+            let correctVal = '';
 
-            const type = q.problem.type;
-            const correctVal = type === 'Q' ? `${q.solution.result.num}/${q.solution.result.den}` : q.solution.result;
+            if (q.problem.type === 'sets') {
+                const { op } = q.problem;
+                let opTitle = '';
+                if (op === 'union') opTitle = 'A ∪ B';
+                else if (op === 'intersection') opTitle = 'A ∩ B';
+                else if (op === 'difference_a_b') opTitle = 'A - B';
+                else if (op === 'difference_b_a') opTitle = 'B - A';
+                
+                questionText = `${i+1}. ${opTitle}`;
+                correctVal = `{${q.solution.result.join(', ')}}`;
+            } else {
+                let opSymbol = '';
+                if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+                else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+                else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+                else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+                
+                const type = q.problem.type;
+                questionText = `${i+1}. ${MathCore.formatNumber(q.problem.a, type)} ${opSymbol} ${MathCore.formatNumber(q.problem.b, type)}`;
+                correctVal = type === 'Q' ? `${q.solution.result.num}/${q.solution.result.den}` : q.solution.result;
+            }
             
             html += `
                 <div class="review-item ${q.isCorrect ? 'correct' : 'incorrect'}">
                     <div class="review-q">
-                        ${i+1}. ${MathCore.formatNumber(q.problem.a, type)} ${opSymbol} ${MathCore.formatNumber(q.problem.b, type)}
+                        ${questionText}
                     </div>
                     <div class="review-a">
                         Tu respuesta: <strong>${answers[i] || 'Vacío'}</strong>
@@ -993,7 +1292,456 @@ const ModuleManager = {
         `;
         
         container.innerHTML = html;
-    }
+    },
+
+    // ==========================================
+    // 6. Módulo de Conjuntos (Sets)
+    // ==========================================
+    renderSetsExplanation: (container) => {
+        container.innerHTML = `
+            <div class="explanation-block">
+                <h3>Teoría de Conjuntos y Diagramas de Venn</h3>
+                <p>Un <strong>conjunto</strong> es una colección bien definida de objetos, llamados elementos. Los conjuntos se nombran con letras mayúsculas (A, B, C) y sus elementos se escriben entre llaves { }.</p>
+                
+                <div class="concept-box">
+                    <h4>Conceptos Básicos</h4>
+                    <ul>
+                        <li><strong>Pertenencia (∈):</strong> Si un elemento está en un conjunto. Ej: 1 ∈ {1, 2, 3}</li>
+                        <li><strong>Cardinalidad (|A|):</strong> Es el número de elementos que tiene un conjunto.</li>
+                        <li><strong>Conjunto Vacío (∅):</strong> Es un conjunto que no tiene elementos.</li>
+                        <li><strong>Subconjunto (⊆):</strong> A es subconjunto de B si todos los elementos de A están en B.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--color-primary);">Operaciones entre Conjuntos</h3>
+            
+            <div class="sets-grid">
+                <!-- UNIÓN -->
+                <div class="set-card">
+                    <h4>Unión (A ∪ B)</h4>
+                    <p>La unión agrupa <strong>todos</strong> los elementos de ambos conjuntos. Es como "sumar" los conjuntos sin repetir elementos.</p>
+                    <div class="set-example">
+                        <small>Ejemplo:</small><br>
+                        A = {1, 2}<br>
+                        B = {2, 3}<br>
+                        <strong>A ∪ B = {1, 2, 3}</strong>
+                    </div>
+                    <svg viewBox="0 0 200 120" class="venn-svg">
+                        <circle cx="70" cy="60" r="40" class="venn-circle set-a filled" />
+                        <circle cx="130" cy="60" r="40" class="venn-circle set-b filled" />
+                        <text x="60" y="65" class="venn-label">A</text>
+                        <text x="140" y="65" class="venn-label">B</text>
+                    </svg>
+                </div>
+
+                <!-- INTERSECCIÓN -->
+                <div class="set-card">
+                    <h4>Intersección (A ∩ B)</h4>
+                    <p>La intersección son los elementos <strong>comunes</strong>, es decir, los que están en A <strong>Y</strong> también en B.</p>
+                    <div class="set-example">
+                        <small>Ejemplo:</small><br>
+                        A = {1, 2, 3}<br>
+                        B = {2, 3, 4}<br>
+                        <strong>A ∩ B = {2, 3}</strong>
+                    </div>
+                    <svg viewBox="0 0 200 120" class="venn-svg">
+                        <defs>
+                            <clipPath id="clip-intersection">
+                                <circle cx="70" cy="60" r="40" />
+                            </clipPath>
+                        </defs>
+                        <circle cx="70" cy="60" r="40" class="venn-circle set-a" />
+                        <circle cx="130" cy="60" r="40" class="venn-circle set-b" clip-path="url(#clip-intersection)" class="filled" style="fill: var(--color-accent); opacity: 0.6;" />
+                        <text x="60" y="65" class="venn-label">A</text>
+                        <text x="140" y="65" class="venn-label">B</text>
+                    </svg>
+                </div>
+
+                <!-- DIFERENCIA -->
+                <div class="set-card">
+                    <h4>Diferencia (A - B)</h4>
+                    <p>Son los elementos que pertenecen a A pero <strong>NO</strong> pertenecen a B. Es como "restarle" B a A.</p>
+                    <div class="set-example">
+                        <small>Ejemplo:</small><br>
+                        A = {1, 2, 3}<br>
+                        B = {2, 3, 4}<br>
+                        <strong>A - B = {1}</strong>
+                    </div>
+                    <svg viewBox="0 0 200 120" class="venn-svg">
+                        <defs>
+                            <mask id="mask-diff-a-b">
+                                <rect x="0" y="0" width="200" height="120" fill="white" />
+                                <circle cx="130" cy="60" r="40" fill="black" />
+                            </mask>
+                        </defs>
+                        <circle cx="70" cy="60" r="40" class="venn-circle set-a filled" mask="url(#mask-diff-a-b)" />
+                        <circle cx="130" cy="60" r="40" class="venn-circle set-b" />
+                        <text x="60" y="65" class="venn-label">A</text>
+                        <text x="140" y="65" class="venn-label">B</text>
+                    </svg>
+                </div>
+
+                <!-- DIFERENCIA SIMÉTRICA -->
+                <div class="set-card">
+                    <h4>Diferencia Simétrica (A Δ B)</h4>
+                    <p>Son los elementos que están en A o en B, pero <strong>NO en ambos</strong>. Es la unión menos la intersección.</p>
+                    <div class="set-example">
+                        <small>Ejemplo:</small><br>
+                        A = {1, 2, 3}<br>
+                        B = {2, 3, 4}<br>
+                        <strong>A Δ B = {1, 4}</strong>
+                    </div>
+                    <svg viewBox="0 0 200 120" class="venn-svg">
+                        <defs>
+                            <mask id="mask-sym-diff">
+                                <rect x="0" y="0" width="200" height="120" fill="white" />
+                                <circle cx="100" cy="60" r="30" fill="black" /> <!-- Approximate intersection mask -->
+                            </mask>
+                            <!-- Better approach for symmetric difference visual -->
+                            <clipPath id="clip-sym-a">
+                                <circle cx="70" cy="60" r="40" />
+                            </clipPath>
+                            <clipPath id="clip-sym-b">
+                                <circle cx="130" cy="60" r="40" />
+                            </clipPath>
+                        </defs>
+                        <!-- A only -->
+                        <circle cx="70" cy="60" r="40" class="venn-circle set-a filled" mask="url(#mask-diff-a-b)" />
+                        <!-- B only (using similar mask logic reversed) -->
+                         <mask id="mask-diff-b-a">
+                                <rect x="0" y="0" width="200" height="120" fill="white" />
+                                <circle cx="70" cy="60" r="40" fill="black" />
+                        </mask>
+                        <circle cx="130" cy="60" r="40" class="venn-circle set-b filled" style="fill: var(--color-accent); opacity: 0.2;" mask="url(#mask-diff-b-a)" />
+                        
+                        <circle cx="70" cy="60" r="40" class="venn-circle set-a" fill="none" />
+                        <circle cx="130" cy="60" r="40" class="venn-circle set-b" fill="none" />
+                        
+                        <text x="60" y="65" class="venn-label">A</text>
+                        <text x="140" y="65" class="venn-label">B</text>
+                    </svg>
+                </div>
+            </div>
+        `;
+    },
+
+    renderSetsPractice: () => {
+        // Override default practice for sets
+        if (ModuleManager.currentModule === 'sets') {
+            ModuleManager.newSetPracticeQuestion();
+            return;
+        }
+        // ... existing logic for other modules ...
+    },
+
+    newSetPracticeQuestion: () => {
+        const { practice } = ModuleManager.state;
+        
+        if (practice.currentQuestionIndex >= practice.totalQuestions) {
+            ModuleManager.showPracticeReport();
+            return;
+        }
+
+        // Randomly decide type: numbers or words (50/50 chance)
+        const useWords = Math.random() > 0.5;
+        let setA, setB, categoryName = '';
+
+        if (useWords) {
+            // Pick a random category
+            const keys = Object.keys(MathCore.categories);
+            const category = keys[MathCore.randomInt(0, keys.length - 1)];
+            categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+            
+            // Generate sets from that category
+            setA = MathCore.generateRandomSet('words', 4, category);
+            setB = MathCore.generateRandomSet('words', 4, category);
+        } else {
+            // Default number generation
+            setA = MathCore.generateSet(4, 1, 10);
+            setB = MathCore.generateSet(4, 5, 15);
+        }
+        
+        const ops = ['union', 'intersection', 'difference_a_b', 'difference_b_a'];
+        const op = ops[MathCore.randomInt(0, 3)];
+        
+        const solution = MathCore.solveSetOperation(setA, setB, op);
+        
+        practice.questions.push({ 
+            problem: { setA, setB, op, type: 'sets', category: categoryName }, 
+            solution 
+        });
+
+        const container = document.getElementById('practice-area');
+        
+        let opTitle = '';
+        if (op === 'union') opTitle = 'A ∪ B';
+        else if (op === 'intersection') opTitle = 'A ∩ B';
+        else if (op === 'difference_a_b') opTitle = 'A - B';
+        else if (op === 'difference_b_a') opTitle = 'B - A';
+
+        container.innerHTML = `
+            <div class="practice-card">
+                <div class="practice-header">
+                    <span>Ejercicio ${practice.currentQuestionIndex + 1} de ${practice.totalQuestions}</span>
+                </div>
+                <div class="sets-problem">
+                    ${categoryName ? `<p style="color: var(--color-accent-dark); font-weight: bold; margin-bottom: 0.5rem;">Tema: ${categoryName}</p>` : ''}
+                    <div class="sets-display">
+                        <p><strong>A</strong> = {${setA.join(', ')}}</p>
+                        <p><strong>B</strong> = {${setB.join(', ')}}</p>
+                    </div>
+                    <div class="sets-question">
+                        Calcula: <strong>${opTitle}</strong>
+                    </div>
+                    <p class="hint-text">Ingresa los elementos separados por comas (ej: ${useWords ? 'Perro, Gato' : '1, 2, 3'})</p>
+                </div>
+                <div class="practice-input-group">
+                    <input type="text" id="practice-answer" placeholder="Respuesta..." autocomplete="off">
+                    <button class="action-btn" onclick="ModuleManager.checkSetPractice()">Comprobar</button>
+                </div>
+                <div id="practice-feedback" class="feedback-msg"></div>
+            </div>
+        `;
+    },
+
+    checkSetPractice: () => {
+        const inputEl = document.getElementById('practice-answer');
+        const input = inputEl.value.trim();
+        if (!input && input !== '') return; // Allow empty set if applicable, but usually not empty input
+        
+        const { practice } = ModuleManager.state;
+        const currentQ = practice.questions[practice.currentQuestionIndex];
+        const correctSet = currentQ.solution.result;
+        
+        // Parse user input
+        const userNums = input.split(',')
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n))
+            .sort((a, b) => a - b);
+        
+        // Compare sets
+        const isCorrect = JSON.stringify(userNums) === JSON.stringify(correctSet);
+
+        practice.results.push({
+            questionIndex: practice.currentQuestionIndex,
+            userAnswer: `{${userNums.join(', ')}}`,
+            isCorrect: isCorrect,
+            correctAnswer: `{${correctSet.join(', ')}}`
+        });
+
+        const feedback = document.getElementById('practice-feedback');
+        
+        if (isCorrect) {
+            feedback.textContent = "¡Correcto! 🎉";
+            feedback.className = "feedback-msg success";
+            window.sounds.playSuccess();
+            ProfileManager.addProgress(0, 1);
+        } else {
+            feedback.textContent = `Incorrecto. La respuesta era {${correctSet.join(', ')}}`;
+            feedback.className = "feedback-msg error";
+            window.sounds.playError();
+        }
+
+        inputEl.disabled = true;
+        document.querySelector('.practice-input-group button').disabled = true;
+
+        practice.currentQuestionIndex++;
+        setTimeout(ModuleManager.newSetPracticeQuestion, 3000);
+    },
+
+    updateSetInputs: () => {
+        const count = parseInt(document.getElementById('gen-set-count').value);
+        const container = document.getElementById('manual-sets-inputs');
+        const labels = ['A', 'B', 'C'];
+        let html = '';
+        
+        for(let i=0; i<count; i++) {
+            html += `
+                <div class="set-input-group">
+                    <label>Conjunto ${labels[i]}:</label>
+                    <input type="text" id="set-input-${i}" placeholder="Ej: 1, 2, 3, 4" class="set-text-input">
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    },
+
+    verifyAndGraphSets: () => {
+        const count = parseInt(document.getElementById('gen-set-count').value);
+        const sets = [];
+        const labels = ['A', 'B', 'C'];
+        
+        // Read inputs
+        for(let i=0; i<count; i++) {
+            const val = document.getElementById(`set-input-${i}`).value;
+            const items = val.split(',').map(s => s.trim()).filter(s => s !== '');
+            // Try to parse numbers if possible, else keep strings
+            const parsedItems = items.map(item => isNaN(item) ? item : Number(item));
+            // Unique items
+            sets.push([...new Set(parsedItems)].sort((a, b) => (typeof a === 'number' && typeof b === 'number') ? a - b : String(a).localeCompare(String(b))));
+        }
+
+        const display = document.getElementById('gen-display');
+        let html = '<div class="sets-analysis">';
+
+        // 1. Show Sets
+        html += '<div class="sets-list">';
+        sets.forEach((set, i) => {
+            html += `<div class="set-display-item"><strong>${labels[i]}</strong> = { ${set.join(', ')} }</div>`;
+        });
+        html += '</div>';
+
+        // 2. Calculate Intersections
+        html += '<div class="sets-intersections-list">';
+        html += '<h4>Intersecciones Calculadas:</h4>';
+        
+        if (count >= 2) {
+            const AnB = MathCore.solveSetOperation(sets[0], sets[1], 'intersection').result;
+            html += `<div>A ∩ B = { ${AnB.length ? AnB.join(', ') : '∅'} }</div>`;
+            
+            if (count === 3) {
+                const AnC = MathCore.solveSetOperation(sets[0], sets[2], 'intersection').result;
+                const BnC = MathCore.solveSetOperation(sets[1], sets[2], 'intersection').result;
+                const AnBnC = MathCore.solveSetOperation(AnB, sets[2], 'intersection').result;
+                
+                html += `<div>A ∩ C = { ${AnC.length ? AnC.join(', ') : '∅'} }</div>`;
+                html += `<div>B ∩ C = { ${BnC.length ? BnC.join(', ') : '∅'} }</div>`;
+                html += `<div>A ∩ B ∩ C = { ${AnBnC.length ? AnBnC.join(', ') : '∅'} }</div>`;
+            }
+        } else {
+            html += '<div>Se necesitan al menos 2 conjuntos para intersecciones.</div>';
+        }
+        html += '</div>';
+
+        // 3. Graph Venn Diagram
+        html += '<div class="venn-graph-container">';
+        html += ModuleManager.generateVennSVG(sets, count);
+        html += '</div>';
+
+        html += '</div>';
+        display.innerHTML = html;
+    },
+
+    generateVennSVG: (sets, count) => {
+        if (count === 1) {
+            return `
+                <svg viewBox="0 0 300 200" class="venn-svg-large">
+                    <circle cx="150" cy="100" r="80" class="venn-circle set-a" />
+                    <text x="150" y="100" text-anchor="middle" class="venn-text">${sets[0].join('\n')}</text>
+                    <text x="150" y="190" text-anchor="middle" class="venn-label-large">A</text>
+                </svg>
+            `;
+        } else if (count === 2) {
+            // Calculate regions
+            const A = sets[0];
+            const B = sets[1];
+            const AnB = MathCore.solveSetOperation(A, B, 'intersection').result;
+            const Aonly = MathCore.solveSetOperation(A, B, 'difference_a_b').result;
+            const Bonly = MathCore.solveSetOperation(B, A, 'difference_b_a').result;
+
+            return `
+                <svg viewBox="0 0 400 250" class="venn-svg-large">
+                    <circle cx="140" cy="125" r="90" class="venn-circle set-a" />
+                    <circle cx="260" cy="125" r="90" class="venn-circle set-b" />
+                    
+                    <!-- Labels -->
+                    <text x="100" y="40" class="venn-label-large" fill="var(--color-primary)">A</text>
+                    <text x="300" y="40" class="venn-label-large" fill="var(--color-accent)">B</text>
+
+                    <!-- Content -->
+                    <foreignObject x="60" y="85" width="80" height="80">
+                        <div class="venn-content">${Aonly.join(', ')}</div>
+                    </foreignObject>
+                    
+                    <foreignObject x="180" y="85" width="40" height="80">
+                        <div class="venn-content center">${AnB.join(', ')}</div>
+                    </foreignObject>
+                    
+                    <foreignObject x="260" y="85" width="80" height="80">
+                        <div class="venn-content">${Bonly.join(', ')}</div>
+                    </foreignObject>
+                </svg>
+            `;
+        } else if (count === 3) {
+            const A = sets[0];
+            const B = sets[1];
+            const C = sets[2];
+
+            // Intersections
+            const AnB = MathCore.solveSetOperation(A, B, 'intersection').result;
+            const AnC = MathCore.solveSetOperation(A, C, 'intersection').result;
+            const BnC = MathCore.solveSetOperation(B, C, 'intersection').result;
+            const AnBnC = MathCore.solveSetOperation(AnB, C, 'intersection').result;
+
+            // Exclusive Regions
+            // A only = A - (B U C)
+            const B_U_C = MathCore.solveSetOperation(B, C, 'union').result;
+            const Aonly = MathCore.solveSetOperation(A, B_U_C, 'difference_a_b').result;
+
+            // B only = B - (A U C)
+            const A_U_C = MathCore.solveSetOperation(A, C, 'union').result;
+            const Bonly = MathCore.solveSetOperation(B, A_U_C, 'difference_a_b').result;
+
+            // C only = C - (A U B)
+            const A_U_B = MathCore.solveSetOperation(A, B, 'union').result;
+            const Conly = MathCore.solveSetOperation(C, A_U_B, 'difference_a_b').result;
+
+            // Pairwise Exclusive (e.g. A n B only = (A n B) - C)
+            const AnB_only = MathCore.solveSetOperation(AnB, C, 'difference_a_b').result;
+            const AnC_only = MathCore.solveSetOperation(AnC, B, 'difference_a_b').result;
+            const BnC_only = MathCore.solveSetOperation(BnC, A, 'difference_a_b').result;
+
+            return `
+                <svg viewBox="0 0 400 400" class="venn-svg-large">
+                    <!-- Circles -->
+                    <circle cx="200" cy="140" r="90" class="venn-circle set-a" style="opacity: 0.6" />
+                    <circle cx="140" cy="240" r="90" class="venn-circle set-b" style="opacity: 0.6" />
+                    <circle cx="260" cy="240" r="90" class="venn-circle set-c" style="opacity: 0.6; stroke: var(--color-success);" />
+
+                    <!-- Labels -->
+                    <text x="200" y="40" class="venn-label-large">A</text>
+                    <text x="60" y="240" class="venn-label-large">B</text>
+                    <text x="340" y="240" class="venn-label-large">C</text>
+
+                    <!-- A only (Top) -->
+                    <foreignObject x="170" y="80" width="60" height="50">
+                        <div class="venn-content small">${Aonly.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- B only (Left Bottom) -->
+                    <foreignObject x="90" y="220" width="60" height="50">
+                        <div class="venn-content small">${Bonly.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- C only (Right Bottom) -->
+                    <foreignObject x="250" y="220" width="60" height="50">
+                        <div class="venn-content small">${Conly.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- A n B only (Left Top Intersection) -->
+                    <foreignObject x="130" y="160" width="50" height="40">
+                        <div class="venn-content small">${AnB_only.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- A n C only (Right Top Intersection) -->
+                    <foreignObject x="220" y="160" width="50" height="40">
+                        <div class="venn-content small">${AnC_only.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- B n C only (Bottom Intersection) -->
+                    <foreignObject x="175" y="270" width="50" height="40">
+                        <div class="venn-content small">${BnC_only.join(', ')}</div>
+                    </foreignObject>
+
+                    <!-- Center (A n B n C) -->
+                    <foreignObject x="180" y="200" width="40" height="40">
+                        <div class="venn-content small bold">${AnBnC.join(', ')}</div>
+                    </foreignObject>
+                </svg>
+            `;
+        }
+    },
 };
 
 // Initialize

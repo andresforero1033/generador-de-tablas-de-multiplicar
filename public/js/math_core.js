@@ -193,6 +193,118 @@ const MathCore = {
         }
 
         return { result, steps };
+    },
+
+    // Set Operations
+    generateSet: (size = 5, min = 1, max = 20) => {
+        const set = new Set();
+        while(set.size < size) {
+            set.add(MathCore.randomInt(min, max));
+        }
+        return Array.from(set).sort((a, b) => a - b);
+    },
+
+    categories: {
+        animales: ['Perro', 'Gato', 'León', 'Tigre', 'Elefante', 'Jirafa', 'Mono', 'Oso', 'Lobo', 'Zorro', 'Águila', 'Serpiente', 'Ballena', 'Delfín', 'Tiburón', 'Conejo', 'Ratón', 'Caballo', 'Vaca', 'Cerdo'],
+        frutas: ['Manzana', 'Pera', 'Plátano', 'Uva', 'Naranja', 'Limón', 'Fresa', 'Cereza', 'Piña', 'Mango', 'Sandía', 'Melón', 'Kiwi', 'Durazno', 'Ciruela', 'Papaya', 'Coco', 'Higo', 'Lima', 'Mora'],
+        colores: ['Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Morado', 'Negro', 'Blanco', 'Gris', 'Rosa', 'Marrón', 'Celeste', 'Turquesa', 'Dorado', 'Plateado', 'Violeta', 'Índigo', 'Beige', 'Cian', 'Magenta'],
+        paises: ['Colombia', 'México', 'España', 'Argentina', 'Perú', 'Chile', 'Brasil', 'EEUU', 'Canadá', 'Francia', 'Italia', 'Alemania', 'Japón', 'China', 'India', 'Rusia', 'Australia', 'Egipto', 'Reino Unido', 'Portugal'],
+        planetas: ['Mercurio', 'Venus', 'Tierra', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón', 'Sol', 'Luna', 'Ceres', 'Eris', 'Makemake', 'Haumea'],
+        instrumentos: ['Guitarra', 'Piano', 'Violín', 'Batería', 'Flauta', 'Trompeta', 'Saxofón', 'Bajo', 'Arpa', 'Clarinete', 'Oboe', 'Violonchelo', 'Acordeón', 'Ukelele', 'Tambor'],
+        deportes: ['Fútbol', 'Baloncesto', 'Tenis', 'Natación', 'Voleibol', 'Béisbol', 'Golf', 'Rugby', 'Boxeo', 'Atletismo', 'Ciclismo', 'Hockey', 'Esquí', 'Surf', 'Karate']
+    },
+
+    generateRandomSet: (type, size = 5, category = null) => {
+        const set = new Set();
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        
+        let sourceArray = [];
+        
+        if (type === 'words') {
+            if (category && MathCore.categories[category]) {
+                sourceArray = MathCore.categories[category];
+            } else {
+                // Pick a random category if not specified
+                const keys = Object.keys(MathCore.categories);
+                const randomKey = keys[MathCore.randomInt(0, keys.length - 1)];
+                sourceArray = MathCore.categories[randomKey];
+            }
+        }
+
+        let attempts = 0;
+        while(set.size < size && attempts < 100) {
+            attempts++;
+            let item;
+            if (type === 'numbers') {
+                item = MathCore.randomInt(1, 50);
+            } else if (type === 'letters') {
+                item = letters[MathCore.randomInt(0, letters.length - 1)];
+            } else if (type === 'words') {
+                item = sourceArray[MathCore.randomInt(0, sourceArray.length - 1)];
+            } else if (type === 'mixed') {
+                const r = Math.random();
+                if (r < 0.33) item = MathCore.randomInt(1, 50);
+                else if (r < 0.66) item = letters[MathCore.randomInt(0, letters.length - 1)];
+                else {
+                    // For mixed, just pick from a default list or random category
+                    const keys = Object.keys(MathCore.categories);
+                    const randomKey = keys[MathCore.randomInt(0, keys.length - 1)];
+                    const mixedSource = MathCore.categories[randomKey];
+                    item = mixedSource[MathCore.randomInt(0, mixedSource.length - 1)];
+                }
+            }
+            set.add(item);
+        }
+        
+        // Sort if numbers or strings
+        return Array.from(set).sort((a, b) => {
+            if (typeof a === 'number' && typeof b === 'number') return a - b;
+            return String(a).localeCompare(String(b));
+        });
+    },
+
+    solveSetOperation: (setA, setB, operation) => {
+        const A = new Set(setA);
+        const B = new Set(setB);
+        let result = new Set();
+        let steps = [];
+
+        switch(operation) {
+            case 'union': // A ∪ B
+                setA.forEach(x => result.add(x));
+                setB.forEach(x => result.add(x));
+                steps.push(`Unión (∪): Elementos que están en A O en B.`);
+                steps.push(`A = {${setA.join(', ')}}`);
+                steps.push(`B = {${setB.join(', ')}}`);
+                steps.push(`Juntamos todos sin repetir.`);
+                break;
+            case 'intersection': // A ∩ B
+                setA.forEach(x => {
+                    if(B.has(x)) result.add(x);
+                });
+                steps.push(`Intersección (∩): Elementos que están en A Y en B.`);
+                steps.push(`Elementos comunes: {${Array.from(result).join(', ')}}`);
+                break;
+            case 'difference_a_b': // A - B
+                setA.forEach(x => {
+                    if(!B.has(x)) result.add(x);
+                });
+                steps.push(`Diferencia (A - B): Elementos que están en A pero NO en B.`);
+                steps.push(`Quitamos de A los que también están en B.`);
+                break;
+            case 'difference_b_a': // B - A
+                setB.forEach(x => {
+                    if(!A.has(x)) result.add(x);
+                });
+                steps.push(`Diferencia (B - A): Elementos que están en B pero NO en A.`);
+                steps.push(`Quitamos de B los que también están en A.`);
+                break;
+        }
+
+        return {
+            result: Array.from(result).sort((a, b) => a - b),
+            steps
+        };
     }
 };
 

@@ -69,6 +69,11 @@
                 <span class="menu-text">Módulo División</span>
             </button>
 
+            <button id="menu-conjuntos" class="menu-item" onclick="ModuleManager.switchModule('sets')">
+                <span class="menu-icon">⭕</span>
+                <span class="menu-text">Módulo Conjuntos</span>
+            </button>
+
             <button id="menu-herramientas" class="menu-item" onclick="cambiarModo('herramientas')">
                 <span class="menu-icon">🛠️</span>
                 <span class="menu-text">Herramientas</span>
@@ -122,6 +127,12 @@
                             <div class="card-icon">➗</div>
                             <h3>División</h3>
                             <p>Domina la división con ejercicios paso a paso.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('sets')" role="button" tabindex="0">
+                            <div class="card-icon">⭕</div>
+                            <h3>Conjuntos</h3>
+                            <p>Aprende diagramas de Venn, unión e intersección.</p>
                         </article>
 
                         <article class="card dashboard-card" id="tour-card-tools" onclick="cambiarModo('herramientas')" role="button" tabindex="0">
@@ -421,6 +432,10 @@
                         <article class="card" onclick="mostrarExplicacion('Q')" role="button" tabindex="0">
                             <h3>Racionales (Q)</h3>
                             <p>Fracciones y decimales. Suma, resta, multiplicación y división.</p>
+                        </article>
+                        <article class="card" onclick="mostrarExplicacion('sets')" role="button" tabindex="0">
+                            <h3>Teoría de Conjuntos</h3>
+                            <p>Unión, Intersección, Diferencia y Diagramas de Venn.</p>
                         </article>
                     </div>
                 </section>

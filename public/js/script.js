@@ -683,6 +683,56 @@ const EXPLICACIONES = {
             </div>
         `
     },
+    'sets': {
+        titulo: "Teoría de Conjuntos y Diagramas de Venn",
+        contenido: `
+            <div class="explicacion-step">
+                <h4>¿Qué es un Conjunto?</h4>
+                <p>Es una colección de elementos (números, letras, cosas) agrupados. Se representan con letras mayúsculas (A, B, C).</p>
+                <p>Ejemplo: A = {1, 2, 3}</p>
+            </div>
+            
+            <div class="explicacion-step">
+                <h4>Operaciones Principales</h4>
+                
+                <div class="concept-box" style="margin-top: 1rem;">
+                    <h5>1. Unión (A ∪ B)</h5>
+                    <p>Juntamos TODOS los elementos de ambos conjuntos.</p>
+                    <p class="math-example">Si A={1,2} y B={2,3} → A ∪ B = {1, 2, 3}</p>
+                </div>
+
+                <div class="concept-box" style="margin-top: 1rem;">
+                    <h5>2. Intersección (A ∩ B)</h5>
+                    <p>Solo los elementos que se REPITEN en ambos.</p>
+                    <p class="math-example">Si A={1,2} y B={2,3} → A ∩ B = {2}</p>
+                </div>
+
+                <div class="concept-box" style="margin-top: 1rem;">
+                    <h5>3. Diferencia (A - B)</h5>
+                    <p>Lo que tiene A que NO tiene B.</p>
+                    <p class="math-example">Si A={1,2} y B={2,3} → A - B = {1}</p>
+                </div>
+            </div>
+
+            <div class="explicacion-step">
+                <h4>Diagramas de Venn</h4>
+                <p>Usamos círculos para dibujar los conjuntos. Donde se cruzan los círculos es la intersección.</p>
+                <div style="display: flex; justify-content: center; margin: 1rem 0;">
+                    <svg viewBox="0 0 200 120" style="width: 200px; height: auto;">
+                        <circle cx="70" cy="60" r="40" fill="none" stroke="#6c5ce7" stroke-width="2" />
+                        <circle cx="130" cy="60" r="40" fill="none" stroke="#00b894" stroke-width="2" />
+                        <text x="60" y="65" font-size="14" font-weight="bold" fill="#333">A</text>
+                        <text x="140" y="65" font-size="14" font-weight="bold" fill="#333">B</text>
+                        <text x="100" y="65" font-size="10" fill="#333">∩</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <button class="action-btn" onclick="irAPracticaConjuntos()">Ir a Práctica de Conjuntos</button>
+            </div>
+        `
+    },
     1: {
         titulo: "División por 1 Cifra: Repartiendo Dulces",
         contenido: `
@@ -992,6 +1042,15 @@ window.mostrarProcesos = UI.showProcesses;
 window.mostrarExplicacion = UI.showExplanation;
 window.irAPracticaDivision = (n) => App.goToPractice('division', n);
 window.irAPracticaMultiplicacion = (n) => App.goToPractice('multiplication', n);
+window.irAPracticaConjuntos = () => {
+    if (typeof ModuleManager !== 'undefined') {
+        ModuleManager.switchModule('sets');
+        // Small delay to ensure DOM is ready/switched
+        setTimeout(() => {
+            ModuleManager.switchTab('practica');
+        }, 50);
+    }
+};
 window.mostrarTemasDivision = UI.showDivisionTopics;
 window.mostrarTemasMultiplicacion = UI.showMultiplicationTopics; // Nueva función global
 window.mostrarTemasConjuntos = UI.showSetsTopics; // Nueva función global
