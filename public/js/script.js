@@ -30,6 +30,8 @@ const DOM = {
     menus: {
         home: $('menu-home'),
         perfil: $('menu-perfil'),
+        sumar: $('menu-sumar'),
+        restar: $('menu-restar'),
         multiplicar: $('menu-multiplicar'),
         multiplicarGen: $('menu-multiplicar-gen'),
         dividir: $('menu-dividir'),
@@ -369,6 +371,8 @@ const UI = {
         const menuMap = {
             'home': DOM.menus.home,
             'perfil': DOM.menus.perfil,
+            'sumar': DOM.menus.sumar,
+            'restar': DOM.menus.restar,
             'multiplicar': DOM.menus.multiplicar,
             'multiplicar-gen': DOM.menus.multiplicarGen,
             'dividir': DOM.menus.dividir,
@@ -393,7 +397,7 @@ const UI = {
         // Configuración específica por modo
         switch(mode) {
             case 'home':
-                DOM.text.titulo.textContent = 'Bienvenido a Creative';
+                DOM.text.titulo.textContent = 'Bienvenido a Creative BY Mariana';
                 UI.toggleElement(DOM.containers.home, true);
                 break;
             case 'perfil':
@@ -792,6 +796,14 @@ const App = {
             themeBtn.addEventListener('click', App.toggleTheme);
         }
 
+        // Sound Toggle Logic
+        const soundBtn = $('sound-toggle');
+        if (soundBtn) {
+            soundBtn.addEventListener('click', App.toggleSound);
+            // Set initial icon
+            soundBtn.textContent = window.sounds.enabled ? '🔊' : '🔇';
+        }
+
         // Cargar tema guardado
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -868,6 +880,13 @@ const App = {
         
         const themeBtn = $('theme-toggle');
         if (themeBtn) themeBtn.textContent = isDark ? '☀️' : '🌙';
+    },
+
+    toggleSound: () => {
+        const isEnabled = window.sounds.toggleMute();
+        const soundBtn = $('sound-toggle');
+        if (soundBtn) soundBtn.textContent = isEnabled ? '🔊' : '🔇';
+        window.notifications.show(isEnabled ? 'Sonido Activado' : 'Sonido Desactivado', 'info');
     },
 
     changeDifficulty: (type, level) => {
@@ -987,3 +1006,7 @@ window.logout = async () => {
         window.location.href = '/';
     }
 };
+
+if (typeof module !== 'undefined') {
+    module.exports = { MathLogic, Calculator };
+}

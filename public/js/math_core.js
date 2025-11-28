@@ -66,6 +66,15 @@ const MathCore = {
                 while (b === 0) b = MathCore.generateNumber(type, range);
             }
         }
+        
+        // For subtraction in Naturals, ensure a >= b to avoid negatives if we want to stay in N
+        if (operation === 'subtraction' && type === 'N') {
+            if (b > a) {
+                const temp = a;
+                a = b;
+                b = temp;
+            }
+        }
 
         return { a, b, type, operation };
     },
@@ -89,7 +98,7 @@ const MathCore = {
                     steps.push(`Simplificar: ${simplified.num}/${simplified.den}`);
                 }
                 result = simplified;
-            } else {
+            } else if (operation === 'division') {
                 // (a/b) / (c/d) = (a/b) * (d/c)
                 const num = a.num * b.den;
                 const den = a.den * b.num;
@@ -106,6 +115,33 @@ const MathCore = {
                     steps.push(`Simplificar: ${simplified.num}/${simplified.den}`);
                 }
                 result = simplified;
+            } else if (operation === 'addition' || operation === 'subtraction') {
+                // (a/b) ± (c/d)
+                // Common denominator = lcm(b, d) = (b*d) / gcd(b,d)
+                const commonDen = (a.den * b.den) / MathCore.gcd(a.den, b.den);
+                
+                const numA = a.num * (commonDen / a.den);
+                const numB = b.num * (commonDen / b.den);
+                
+                let numRes;
+                if (operation === 'addition') {
+                    numRes = numA + numB;
+                    steps.push(`Mínimo Común Múltiplo de denominadores (${a.den}, ${b.den}) = ${commonDen}`);
+                    steps.push(`Convertir fracciones: ${a.num}/${a.den} = ${numA}/${commonDen} y ${b.num}/${b.den} = ${numB}/${commonDen}`);
+                    steps.push(`Sumar numeradores: ${numA} + ${numB} = ${numRes}`);
+                } else {
+                    numRes = numA - numB;
+                    steps.push(`Mínimo Común Múltiplo de denominadores (${a.den}, ${b.den}) = ${commonDen}`);
+                    steps.push(`Convertir fracciones: ${a.num}/${a.den} = ${numA}/${commonDen} y ${b.num}/${b.den} = ${numB}/${commonDen}`);
+                    steps.push(`Restar numeradores: ${numA} - ${numB} = ${numRes}`);
+                }
+                
+                const simplified = MathCore.simplifyFraction(numRes, commonDen);
+                steps.push(`Resultado: ${numRes}/${commonDen}`);
+                if (numRes !== simplified.num || commonDen !== simplified.den) {
+                    steps.push(`Simplificar: ${simplified.num}/${simplified.den}`);
+                }
+                result = simplified;
             }
         } else {
             // Integer/Natural operations
@@ -119,7 +155,7 @@ const MathCore = {
                     const signRes = result >= 0 ? '+' : '-';
                     steps.push(`Ley de signos: (${signA}) × (${signB}) = ${signRes}`);
                 }
-            } else {
+            } else if (operation === 'division') {
                 // Division
                 // For generator, we might want exact division or division with remainder
                 // For this core, let's return exact float or string with remainder
@@ -137,9 +173,29 @@ const MathCore = {
                 if (type === 'Z') {
                      steps.push(`Ley de signos aplicada al cociente.`);
                 }
+            } else if (operation === 'addition') {
+                result = a + b;
+                steps.push(`${a} + ${b} = ${result}`);
+                if (type === 'Z') {
+                    if ((a >= 0 && b >= 0) || (a < 0 && b < 0)) {
+                        steps.push(`Signos iguales: Se suman y se mantiene el signo.`);
+                    } else {
+                        steps.push(`Signos diferentes: Se restan y se pone el signo del mayor valor absoluto.`);
+                    }
+                }
+            } else if (operation === 'subtraction') {
+                result = a - b;
+                steps.push(`${a} - ${b} = ${result}`);
+                if (type === 'Z') {
+                    steps.push(`Restar es sumar el opuesto: ${a} + (${-b}) = ${result}`);
+                }
             }
         }
 
         return { result, steps };
     }
 };
+
+if (typeof module !== 'undefined') {
+    module.exports = MathCore;
+}

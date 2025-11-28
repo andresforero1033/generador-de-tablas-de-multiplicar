@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Herramienta educativa para aprender tablas de multiplicar, divisiones y usar calculadora.">
-    <title>Creative - Matemáticas Divertidas</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+    <title>Creative BY Mariana - Matemáticas Divertidas</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>">
     <link rel="stylesheet" href="css/styles.css">
     <script>
         // Protección de ruta
@@ -20,8 +20,16 @@
     <div class="app-container">
         <nav class="sidebar" id="sidebar" aria-label="Menú principal">
             <header>
-                <h2 class="brand-title">✨ <span class="brand-text">Creative</span></h2>
-                <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar Tema">🌙</button>
+                <h2 class="brand-title">
+                    <div class="brand-container">
+                        <span class="brand-text">Creative</span>
+                        <span class="brand-subtitle">BY Mariana</span>
+                    </div>
+                </h2>
+                <div class="header-actions" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 1rem;">
+                    <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar Tema" style="margin: 0;">🌙</button>
+                    <button id="sound-toggle" class="theme-toggle-btn" title="Silenciar/Activar Sonido" style="margin: 0;">🔊</button>
+                </div>
                 <button onclick="logout()" class="logout-btn">
                     <span class="menu-icon">🚪</span>
                     <span class="menu-text">Cerrar Sesión</span>
@@ -38,6 +46,16 @@
                 <span class="menu-text">Mi Perfil</span>
             </button>
             
+            <button id="menu-sumar" class="menu-item" onclick="ModuleManager.switchModule('addition')">
+                <span class="menu-icon">➕</span>
+                <span class="menu-text">Módulo Suma</span>
+            </button>
+
+            <button id="menu-restar" class="menu-item" onclick="ModuleManager.switchModule('subtraction')">
+                <span class="menu-icon">➖</span>
+                <span class="menu-text">Módulo Resta</span>
+            </button>
+
             <button id="menu-multiplicar" class="menu-item" onclick="ModuleManager.switchModule('multiplication')">
                 <span class="menu-icon">✖️</span>
                 <span class="menu-text">Módulo Multiplicación</span>
@@ -66,7 +84,7 @@
         <main class="main-content">
             <section class="container" aria-labelledby="titulo">
                 <header>
-                    <h1 id="titulo">Bienvenido a Creative</h1>
+                    <h1 id="titulo">Bienvenido a Creative BY Mariana</h1>
                 </header>
 
                 <!-- Home Dashboard -->
@@ -77,6 +95,18 @@
                             <div class="card-icon">👤</div>
                             <h3>Mi Perfil</h3>
                             <p>Mira tu progreso, medallas y personaliza tu avatar.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('addition')" role="button" tabindex="0">
+                            <div class="card-icon">➕</div>
+                            <h3>Suma</h3>
+                            <p>Aprende a sumar números naturales, enteros y racionales.</p>
+                        </article>
+
+                        <article class="card dashboard-card" onclick="ModuleManager.switchModule('subtraction')" role="button" tabindex="0">
+                            <div class="card-icon">➖</div>
+                            <h3>Resta</h3>
+                            <p>Domina la resta y la ley de signos.</p>
                         </article>
 
                         <article class="card dashboard-card" onclick="ModuleManager.switchModule('multiplication')" role="button" tabindex="0">

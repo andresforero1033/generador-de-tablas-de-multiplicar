@@ -1,7 +1,7 @@
 /* =========================================
    Variables & Configuración (CSS Custom Properties)
    ========================================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600;700&display=swap');
 
 :root {
     /* Paleta de Colores "Modern Playful" */
@@ -242,7 +242,7 @@ body.dark-mode .auth-brand-outside {
     min-height: 24px;
 }
 .feedback-msg.success { color: var(--color-accent); }
-.feedback-msg.error { color: var(--color-danger); }
+.feedback.msg.error { color: var(--color-danger); }
 
 .score-bad { color: var(--color-danger); font-weight: bold; }
 .score-good { color: var(--color-info); font-weight: bold; }
@@ -422,13 +422,38 @@ body {
     transition: all 0.3s;
 }
 
+.brand-container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.brand-text {
+    font-family: 'Pacifico', cursive;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.brand-subtitle {
+    font-size: 0.65rem;
+    font-weight: 300;
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
 .sidebar.collapsed header h2 {
     font-size: 1.2rem;
     border-bottom: none;
     margin-bottom: var(--spacing-sm);
 }
 
-.sidebar.collapsed .brand-text {
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .brand-subtitle {
     display: none;
 }
 
@@ -1094,6 +1119,12 @@ select:focus {
     letter-spacing: -1px;
     text-shadow: 0 4px 10px rgba(0,0,0,0.1);
     animation: fadeInDown 0.5s ease-out;
+}
+
+.auth-brand-outside .brand-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    margin-top: 5px;
 }
 
 @keyframes fadeInDown {

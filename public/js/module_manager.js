@@ -182,7 +182,12 @@ const ModuleManager = {
         // Integration with global UI
         if (typeof UI !== 'undefined') {
             UI.resetViews();
-            const menuName = moduleName === 'multiplication' ? 'multiplicar' : 'dividir';
+            let menuName = '';
+            if (moduleName === 'multiplication') menuName = 'multiplicar';
+            else if (moduleName === 'division') menuName = 'dividir';
+            else if (moduleName === 'addition') menuName = 'sumar';
+            else if (moduleName === 'subtraction') menuName = 'restar';
+            
             UI.updateActiveMenu(menuName);
             
             // Ocultar título global ya que el módulo tiene el suyo propio
@@ -201,7 +206,12 @@ const ModuleManager = {
         if (container) container.classList.remove('u-hidden');
 
         // Update UI Title
-        const title = moduleName === 'multiplication' ? 'Módulo de Multiplicación' : 'Módulo de División';
+        let title = '';
+        if (moduleName === 'multiplication') title = 'Módulo de Multiplicación';
+        else if (moduleName === 'division') title = 'Módulo de División';
+        else if (moduleName === 'addition') title = 'Módulo de Suma';
+        else if (moduleName === 'subtraction') title = 'Módulo de Resta';
+
         document.getElementById('module-title').textContent = title;
         
         // Reset Views
@@ -236,11 +246,18 @@ const ModuleManager = {
     // ==========================================
     renderExplanation: () => {
         const container = document.getElementById('explanation-content');
-        const isMulti = ModuleManager.currentModule === 'multiplication';
+        const mod = ModuleManager.currentModule;
+        let title = '';
+        let opSymbol = '';
+        
+        if (mod === 'multiplication') { title = 'La Multiplicación'; opSymbol = '×'; }
+        else if (mod === 'division') { title = 'La División'; opSymbol = '÷'; }
+        else if (mod === 'addition') { title = 'La Suma'; opSymbol = '+'; }
+        else if (mod === 'subtraction') { title = 'La Resta'; opSymbol = '-'; }
         
         let html = `
             <div class="explanation-block">
-                <h3>${isMulti ? 'La Multiplicación' : 'La División'} en los Conjuntos Numéricos</h3>
+                <h3>${title} en los Conjuntos Numéricos</h3>
                 <p>Exploraremos cómo funciona esta operación en diferentes tipos de números.</p>
             </div>
         `;
@@ -268,7 +285,7 @@ const ModuleManager = {
                     <div class="example-card">
                         <div class="problem">
                             ${MathCore.formatNumber(problem.a, type.code)} 
-                            ${isMulti ? '×' : '÷'} 
+                            ${opSymbol} 
                             ${MathCore.formatNumber(problem.b, type.code)}
                         </div>
                         <div class="solution">
@@ -289,7 +306,7 @@ const ModuleManager = {
             <div class="video-section">
                 <h4>Video Explicativo</h4>
                 <div class="video-placeholder">
-                    <p>Aquí iría un video de YouTube sobre ${isMulti ? 'Multiplicación' : 'División'}</p>
+                    <p>Aquí iría un video de YouTube sobre ${title}</p>
                     <!-- <iframe ... ></iframe> -->
                 </div>
             </div>
@@ -317,7 +334,11 @@ const ModuleManager = {
         const display = document.getElementById('gen-display');
         const steps = document.getElementById('gen-steps');
 
-        const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+        let opSymbol = '';
+        if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+        else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+        else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+        else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
         
         display.innerHTML = `
             <div class="gen-problem">
@@ -384,7 +405,11 @@ const ModuleManager = {
         practice.questions.push({ problem, solution });
         
         const container = document.getElementById('practice-area');
-        const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+        let opSymbol = '';
+        if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+        else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+        else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+        else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
 
         container.innerHTML = `
             <div class="practice-card">
@@ -487,7 +512,12 @@ const ModuleManager = {
 
         practice.results.forEach((res, i) => {
             const q = practice.questions[i];
-            const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+            let opSymbol = '';
+            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+
             const type = q.problem.type;
             
             html += `
@@ -559,7 +589,11 @@ const ModuleManager = {
             }
             
             const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
-            const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+            let opSymbol = '';
+            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
             
             html += `
                 <div class="ws-item">
@@ -723,7 +757,12 @@ const ModuleManager = {
     renderCurrentQuestion: () => {
         const { questions, answers, currentQuestionIndex } = ModuleManager.state.exam;
         const q = questions[currentQuestionIndex];
-        const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+        let opSymbol = '';
+        if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+        else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+        else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+        else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+
         const type = q.problem.type;
         const val = answers[currentQuestionIndex] || '';
 
@@ -850,7 +889,12 @@ const ModuleManager = {
 
         const { questions, answers } = ModuleManager.state.exam;
         questions.forEach((q, i) => {
-            const opSymbol = ModuleManager.currentModule === 'multiplication' ? '×' : '÷';
+            let opSymbol = '';
+            if (ModuleManager.currentModule === 'multiplication') opSymbol = '×';
+            else if (ModuleManager.currentModule === 'division') opSymbol = '÷';
+            else if (ModuleManager.currentModule === 'addition') opSymbol = '+';
+            else if (ModuleManager.currentModule === 'subtraction') opSymbol = '-';
+
             const type = q.problem.type;
             const correctVal = type === 'Q' ? `${q.solution.result.num}/${q.solution.result.den}` : q.solution.result;
             

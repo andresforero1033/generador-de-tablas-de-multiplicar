@@ -5,7 +5,13 @@
 class SoundManager {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this.enabled = true;
+        this.enabled = localStorage.getItem('soundEnabled') !== 'false'; // Default true
+    }
+
+    toggleMute() {
+        this.enabled = !this.enabled;
+        localStorage.setItem('soundEnabled', this.enabled);
+        return this.enabled;
     }
 
     playTone(freq, type, duration, startTime = 0) {
