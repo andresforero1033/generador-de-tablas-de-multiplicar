@@ -499,7 +499,16 @@ const ModuleManager = {
         
         // Premio por puntaje perfecto
         if (grade === 5) {
-            setTimeout(() => ProfileManager.addTrophy(), 500);
+            setTimeout(() => {
+                ProfileManager.addTrophy();
+                if (window.confetti) {
+                    window.confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }, 500);
         }
         
         let statusClass = '';
@@ -871,7 +880,16 @@ const ModuleManager = {
         
         if (grade === 5) {
             ProfileManager.addProgress(1, 0);
-            setTimeout(() => window.notifications.show('¡Examen Perfecto! +1 Estrella ⭐', 'success'), 500);
+            setTimeout(() => {
+                window.notifications.show('¡Examen Perfecto! +1 Estrella ⭐', 'success');
+                if (window.confetti) {
+                    window.confetti({
+                        particleCount: 150,
+                        spread: 100,
+                        origin: { y: 0.6 }
+                    });
+                }
+            }, 500);
         }
         
         ModuleManager.renderExamResults(grade);
