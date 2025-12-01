@@ -5,12 +5,29 @@
 ![Estado del Proyecto](https://img.shields.io/badge/Estado-En_Desarrollo-green)
 ![Licencia](https://img.shields.io/badge/Licencia-MIT-blue)
 
+## 📚 Tabla de Contenidos
+
+- [Características Principales](#-características-principales)
+- [Tecnologías Utilizadas](#️-tecnologías-utilizadas-mern-stack)
+- [Arquitectura General](#-arquitectura-general)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Flujo de Usuario y Autenticación](#-flujo-de-usuario-y-autenticación)
+- [API REST](#-api-rest)
+- [Variables de Entorno](#-variables-de-entorno)
+- [Instalación y Ejecución Local](#-instalación-y-ejecución-local)
+- [Scripts Disponibles](#-scripts-disponibles)
+- [Pruebas Automatizadas](#-pruebas-automatizadas)
+- [Roadmap](#-roadmap)
+- [Contribución](#-contribución)
+- [Licencia](#-licencia)
+
 ## ✨ Características Principales
 
 ### 🎨 Experiencia de Usuario (UI/UX)
 *   **Diseño 'Modern Playful':** Interfaz limpia con Glassmorphism, animaciones suaves y una paleta de colores vibrante.
 *   **Navegación Flexible:** Menú lateral inteligente que permite tres estados: expandido, colapsado (solo iconos) y totalmente oculto para maximizar el área de trabajo.
 *   **🌙 Modo Oscuro:** Soporte nativo para tema oscuro, ideal para reducir la fatiga visual.
+*   **⚡ Tema Aurora Neon:** Tercer modo cromático con glassmorphism translúcido, gradientes energéticos y microinteracciones que aportan dinamismo sin perder accesibilidad.
 *   **Diseño Responsivo:** Adaptable a cualquier dispositivo (Móvil, Tablet, Escritorio).
 *   **Footer Dinámico:** Información de contacto, servicios y legal accesible al final del contenido.
 
@@ -21,6 +38,13 @@
     *   **División:** Niveles progresivos (1, 2, 3 cifras).
 *   **Visualización de Procesos:** Muestra el paso a paso de las operaciones ("Show your work"), simulando el proceso en papel.
 *   **Calculadora Integrada:** Para verificaciones rápidas sin salir de la app.
+*   **Modulo de Juegos:** Reto contrarreloj de 60 segundos que genera multiplicaciones aleatorias, suma puntos por respuestas correctas y entrega bonos de estrellas por racha.
+
+### 🎮 Gamificación y Progreso
+*   **Modo Juegos dedicado:** Sólo visible dentro del módulo “Juegos”, con tablero, historial y controles accesibles desde cualquier dispositivo.
+*   **Historial de Partidas:** Registra tus últimos intentos e identifica mejoras en tu velocidad mental.
+*   **Récords Globales del Perfil:** Cada puntaje máximo se sincroniza con la sección “Records de los juegos” en el perfil del usuario.
+*   **Bonos de Estrellas y Trofeos:** Cada 10 aciertos consecutivos se otorgan recompensas adicionales que alimentan el progreso general.
 
 ### 📚 Material de Aprendizaje
 *   **Multiplicación:** Guías interactivas desde conceptos básicos hasta multiplicación con decimales (Nivel 4).
@@ -45,6 +69,66 @@
 *   **Seguridad:**
     *   JWT (JSON Web Tokens).
     *   Bcryptjs (Hashing de contraseñas).
+
+## 🧱 Arquitectura General
+
+- **Cliente SPA (`public/`)**: HTML/CSS/JS con módulos especializados (`math_core.js`, `module_manager.js`, `ui.js`) que renderizan la interfaz, generan ejercicios y gestionan la experiencia gamificada sin frameworks adicionales.
+- **Servidor Express (`server.js`)**: Exposición de rutas públicas (`/`, `/app`) y endpoints `/api/register` y `/api/login`, además de servir los activos estáticos.
+- **Persistencia (`models/User.js`)**: Usuarios almacenados en MongoDB Atlas con `Mongoose`, incluyendo hooks `pre-save` para hashing y métodos personalizados para validar contraseñas.
+- **Autenticación**: JWT firmados con `JWT_SECRET`, enviados al frontend para proteger las secciones privadas mediante almacenamiento local.
+- **Testing**: Suite con `Jest` + `Supertest` que valida tanto la lógica matemática como las rutas del servidor para prevenir regresiones.
+
+## 🗂️ Estructura del Proyecto
+
+```text
+.
+├── public/
+│   ├── index.html           # Aplicación principal (SPA)
+│   ├── login.html           # Vista de autenticación con animaciones 3D
+│   ├── css/styles.css       # Diseño modern playful + dark mode
+│   └── js/
+│       ├── auth.js          # Flujos de login/registro y manejo de tokens
+│       ├── math_core.js     # Motor matemático (N, Z, Q, conjuntos)
+│       ├── module_manager.js# UI/estado de módulos y progreso
+│       ├── script.js        # Inicialización general y navegación
+│       └── ui.js            # Sonidos, notificaciones, modales y tour
+├── models/User.js           # Esquema y lógica de usuarios
+├── server.js                # Servidor Express + endpoints REST
+├── tests/
+│   ├── math_core.test.js    # Cobertura de utilidades y operaciones
+│   └── server.test.js       # Smoke tests de rutas principales
+├── package.json             # Dependencias y scripts npm
+└── README.md                # Documentación del proyecto
+```
+
+## 🔁 Flujo de Usuario y Autenticación
+
+1. **Ingreso**: Los usuarios acceden a `/` y, si no tienen token, ven `login.html` con modo oscuro, animaciones y formularios.
+2. **Registro/Login**: `auth.js` consume `/api/register` o `/api/login`, valida respuestas y almacena `token` + `username` en `localStorage`.
+3. **Protección de rutas**: Al detectar un token válido, se redirige automáticamente a `/app`, donde la SPA carga módulos educativos, perfil y juegos.
+4. **Persistencia local**: Progreso, récords y configuraciones (tema, audio, tour guiado) se guardan en `localStorage` para mantener la experiencia personalizada incluso offline.
+
+## 🔌 API REST
+
+| Método | Ruta           | Descripción                               | Cuerpo esperado                   | Respuesta exitosa |
+|--------|----------------|-------------------------------------------|-----------------------------------|-------------------|
+| POST   | `/api/register`| Crea un usuario nuevo en MongoDB          | `{ "username", "password" }`      | `201 + mensaje`   |
+| POST   | `/api/login`   | Autentica y entrega un JWT válido por 1h  | `{ "username", "password" }`      | `200 + token + username` |
+
+- **Errores controlados**: Respuestas `400` para duplicados, `401` para credenciales inválidas y `500` para fallos internos.
+- **Protección adicional**: Contraseñas hasheadas con `bcryptjs` y tokens firmados con expiración para reducir riesgos.
+
+## ⚙️ Variables de Entorno
+
+Define un archivo `.env` en la raíz con las siguientes claves:
+
+| Variable      | Uso                                                          |
+|---------------|---------------------------------------------------------------|
+| `PORT`        | Puerto HTTP para Express. Valor por defecto: `3000`.          |
+| `MONGODB_URI` | Cadena de conexión a MongoDB Atlas o instancia local.         |
+| `JWT_SECRET`  | Frase segura utilizada para firmar y validar los tokens JWT.  |
+
+> Mantén este archivo fuera del control de versiones para proteger credenciales.
 
 ## 🚀 Instalación y Ejecución Local
 
@@ -71,9 +155,34 @@
     ```bash
     npm start
     ```
+    > Durante el desarrollo puedes usar `npm run dev` para recarga automática mediante `nodemon`.
 
 5.  **Acceder a la aplicación:**
     Abre tu navegador en `http://localhost:3000`.
+
+6. **Ejecutar pruebas automatizadas:**
+    ```bash
+    npm test
+    ```
+
+## 📦 Scripts Disponibles
+
+- `npm start`: Lanza el servidor Express en modo producción simple.
+- `npm run dev`: Ejecuta el servidor con `nodemon` para reinicios en caliente durante el desarrollo.
+- `npm test`: Corre la suite de pruebas con `Jest` y `Supertest`.
+
+## 🧪 Pruebas Automatizadas
+
+- **`tests/math_core.test.js`** valida el corazón matemático: utilidades (`gcd`, simplificación de fracciones), generadores y resolución de operaciones para conjuntos `N`, `Z` y `Q`.
+- **`tests/server.test.js`** verifica que las rutas principales respondan correctamente, incluyendo redirecciones y el fallback hacia `/`.
+- Ejecuta `npm test` antes de publicar cambios para asegurar que no existan regresiones en la lógica crítica.
+
+## 🛣️ Roadmap
+
+- Integrar almacenamiento de progreso y récords en base de datos para sincronizar múltiples dispositivos.
+- Agregar endpoints autenticados para ejercicios personalizados y analíticas de desempeño.
+- Internacionalizar la interfaz para soportar inglés y portugués.
+- Añadir más módulos teóricos (fracciones avanzadas, álgebra básica) con sus respectivos juegos.
 
 ## 🤝 Contribución
 

@@ -17,6 +17,16 @@ const state = {
             division: 1,
             multiplication: 1
         }
+    },
+    games: {
+        isPlaying: false,
+        timeLeft: 60,
+        score: 0,
+        streak: 0,
+        best: 0,
+        timerId: null,
+        currentQuestion: null,
+        recentRuns: []
     }
 };
 
@@ -38,6 +48,7 @@ const DOM = {
         calculadora: $('menu-calculadora'),
         aprendizaje: $('menu-aprendizaje'),
         herramientas: $('menu-herramientas'),
+        juegos: $('menu-juegos')
     },
     submenus: {
         multiplicarGen: $('submenu-multiplicar-gen'),
@@ -59,6 +70,7 @@ const DOM = {
         servicios: $('servicios-container'),
         blog: $('blog-container'),
         legal: $('legal-container'),
+        juegos: $('juegos-container'),
         resultado: $('resultado-container'), // Contenedor padre
         resultadoContent: $('resultado'),
         procesos: $('procesos-container'),
@@ -292,6 +304,18 @@ class Calculator {
  * Maneja la interacción con el DOM y la navegación.
  */
 const UI = {
+    resetScrollPosition: () => {
+        // Asegura que el contenido principal comience desde arriba en cada navegación
+        const mainArea = document.querySelector('.main-content');
+        if (mainArea) {
+            mainArea.scrollTop = 0;
+        }
+        // También resetea el scroll del documento para vistas móviles
+        if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        }
+    },
+
     toggleElement: (element, show) => {
         if (!element) return;
         if (show) {
@@ -379,7 +403,8 @@ const UI = {
             'calculadora': DOM.menus.herramientas,
             'generador-tablas': DOM.menus.herramientas,
             'aprendizaje': DOM.menus.aprendizaje,
-            'herramientas': DOM.menus.herramientas
+            'herramientas': DOM.menus.herramientas,
+            'juegos': DOM.menus.juegos
         };
         
         if (menuMap[mode]) menuMap[mode].classList.add('active');
@@ -390,6 +415,7 @@ const UI = {
         UI.updateActiveMenu(mode);
 
         UI.resetViews();
+        UI.resetScrollPosition();
 
         // Asegurar que el título global sea visible (por si venimos de un módulo que lo ocultó)
         UI.toggleElement(DOM.text.titulo, true);
@@ -440,6 +466,11 @@ const UI = {
             case 'aprendizaje':
                 DOM.text.titulo.textContent = 'Materiales de Aprendizaje';
                 UI.toggleElement(DOM.containers.aprendizaje, true);
+                break;
+            case 'juegos':
+                DOM.text.titulo.textContent = 'Modo Juegos';
+                UI.toggleElement(DOM.containers.juegos, true);
+                if (window.GamesModule) window.GamesModule.ensureReady();
                 break;
             case 'sobre-nosotros':
                 DOM.text.titulo.textContent = 'Sobre Nosotros';
@@ -836,6 +867,9 @@ const EXPLICACIONES = {
  * Controlador Principal de la Aplicación
  */
 const App = {
+    themeSequence: ['light', 'dark', 'aurora'],
+    currentTheme: 'light',
+
     init: () => {
         // Event Listeners Globales
         document.addEventListener('keydown', App.handleKeydown);
@@ -855,11 +889,8 @@ const App = {
         }
 
         // Cargar tema guardado
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-mode');
-            if (themeBtn) themeBtn.textContent = '☀️';
-        }
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        App.applyTheme(savedTheme);
 
         // Global Sound Listeners
         document.addEventListener('click', (e) => {
@@ -929,12 +960,32 @@ const App = {
     },
 
     toggleTheme: () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        
+        const idx = App.themeSequence.indexOf(App.currentTheme);
+        const nextTheme = App.themeSequence[(idx + 1) % App.themeSequence.length];
+        App.applyTheme(nextTheme);
+    },
+
+    applyTheme: (theme) => {
+        App.currentTheme = App.themeSequence.includes(theme) ? theme : 'light';
+        document.body.classList.remove('dark-mode', 'aurora-mode');
+        if (App.currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else if (App.currentTheme === 'aurora') {
+            document.body.classList.add('aurora-mode');
+        }
+        localStorage.setItem('theme', App.currentTheme);
+        App.updateThemeToggleIcon();
+    },
+
+    updateThemeToggleIcon: () => {
         const themeBtn = $('theme-toggle');
-        if (themeBtn) themeBtn.textContent = isDark ? '☀️' : '🌙';
+        if (!themeBtn) return;
+        const iconMap = {
+            light: '🌙',  // Próximo paso: modo oscuro
+            dark: '⚡',   // Próximo paso: Aurora
+            aurora: '☀️' // Próximo paso: claro
+        };
+        themeBtn.textContent = iconMap[App.currentTheme] || '🌙';
     },
 
     toggleSound: () => {
@@ -1026,9 +1077,288 @@ const App = {
     }
 };
 
+const GamesModule = {
+    initialized: false,
+    config: {
+        duration: 60,
+        minFactor: 2,
+        maxFactor: 12
+    },
+    elements: {},
+    state: state.games,
+
+    init() {
+        this.cacheDom();
+        if (!this.elements.startBtn) return;
+        this.bindEvents();
+        this.loadPersistentData();
+        this.initialized = true;
+        this.resetView();
+    },
+
+    cacheDom() {
+        this.elements = {
+            startBtn: $('game-start-btn'),
+            stopBtn: $('game-stop-btn'),
+            submitBtn: $('game-submit-btn'),
+            timer: $('game-timer'),
+            score: $('game-score'),
+            streak: $('game-streak'),
+            best: $('game-best'),
+            question: $('game-question'),
+            answer: $('game-answer'),
+            feedback: $('game-feedback'),
+            history: $('game-history'),
+            resultBanner: $('game-result-banner')
+        };
+    },
+
+    bindEvents() {
+        const { startBtn, stopBtn, submitBtn, answer } = this.elements;
+        if (startBtn) startBtn.addEventListener('click', () => this.startGame());
+        if (stopBtn) stopBtn.addEventListener('click', () => this.endGame(true));
+        if (submitBtn) submitBtn.addEventListener('click', () => this.submitAnswer());
+        if (answer) {
+            answer.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.submitAnswer();
+                }
+            });
+        }
+    },
+
+    loadPersistentData() {
+        try {
+            const savedRuns = JSON.parse(localStorage.getItem('gameRecentRuns') || '[]');
+            if (Array.isArray(savedRuns)) {
+                this.state.recentRuns = savedRuns;
+            }
+        } catch (error) {
+            console.warn('No se pudieron cargar los intentos previos del juego', error);
+            this.state.recentRuns = [];
+        }
+        this.syncBestRecord();
+        this.renderHistory();
+    },
+
+    resetView() {
+        this.state.isPlaying = false;
+        this.state.timeLeft = this.config.duration;
+        this.state.score = 0;
+        this.state.streak = 0;
+        this.state.currentQuestion = null;
+        this.updateTimerDisplay();
+        this.updateScoreboard();
+        this.showMessage('Pulsa iniciar para comenzar', 'info');
+        this.toggleInputs(false);
+        this.hideResultBanner();
+        if (this.elements.startBtn) this.elements.startBtn.disabled = false;
+        if (this.elements.stopBtn) this.elements.stopBtn.disabled = true;
+    },
+
+    ensureReady() {
+        if (!this.initialized) {
+            this.init();
+        }
+        if (!this.initialized) return;
+        this.syncBestRecord();
+        this.updateScoreboard();
+        this.renderHistory();
+    },
+
+    syncBestRecord() {
+        const profileBest = window.ProfileManager?.data?.gameRecords?.multiplicationRush || 0;
+        this.state.best = profileBest;
+        if (this.elements.best) this.elements.best.textContent = profileBest;
+    },
+
+    startGame() {
+        if (this.state.isPlaying) return;
+        this.state.isPlaying = true;
+        this.state.timeLeft = this.config.duration;
+        this.state.score = 0;
+        this.state.streak = 0;
+        this.state.currentQuestion = null;
+        this.hideResultBanner();
+        this.showMessage('¡Vamos! Responde lo más rápido posible.', 'info');
+        this.toggleInputs(true);
+        this.elements.startBtn.disabled = true;
+        this.elements.stopBtn.disabled = false;
+        this.generateQuestion();
+        this.updateScoreboard();
+        this.updateTimerDisplay();
+        this.startTimer();
+    },
+
+    startTimer() {
+        this.clearTimer();
+        this.state.timerId = setInterval(() => {
+            this.state.timeLeft--;
+            this.updateTimerDisplay();
+            if (this.state.timeLeft <= 0) {
+                this.endGame(false);
+            }
+        }, 1000);
+    },
+
+    clearTimer() {
+        if (this.state.timerId) {
+            clearInterval(this.state.timerId);
+            this.state.timerId = null;
+        }
+    },
+
+    generateQuestion() {
+        const a = MathLogic.generateRandomInt(this.config.minFactor, this.config.maxFactor);
+        const b = MathLogic.generateRandomInt(this.config.minFactor, this.config.maxFactor);
+        this.state.currentQuestion = { a, b, answer: a * b };
+        if (this.elements.question) {
+            this.elements.question.textContent = `${a} × ${b}`;
+        }
+        if (this.elements.answer) {
+            this.elements.answer.value = '';
+            this.elements.answer.removeAttribute('disabled');
+            this.elements.answer.focus();
+        }
+    },
+
+    submitAnswer() {
+        if (!this.state.isPlaying || !this.state.currentQuestion) return;
+        const rawValue = this.elements.answer.value.trim();
+        if (rawValue === '') {
+            this.showMessage('Ingresa una respuesta para continuar', 'info');
+            return;
+        }
+
+        const userAnswer = parseInt(rawValue, 10);
+        if (Number.isNaN(userAnswer)) {
+            this.showMessage('Solo se permiten números enteros', 'error');
+            return;
+        }
+
+        const correct = this.state.currentQuestion.answer;
+        if (userAnswer === correct) {
+            this.state.score++;
+            this.state.streak++;
+            this.showMessage('¡Correcto! 🎉', 'success');
+            window.sounds.playSuccess();
+            this.updateScoreboard();
+            this.generateQuestion();
+        } else {
+            this.state.streak = 0;
+            this.showMessage(`Incorrecto, la respuesta era ${correct}`, 'error');
+            window.sounds.playError();
+            if (this.elements.answer) this.elements.answer.select();
+        }
+    },
+
+    endGame(manualStop) {
+        if (!this.state.isPlaying) return;
+        if (!this.initialized) return;
+        this.state.isPlaying = false;
+        this.clearTimer();
+        this.toggleInputs(false);
+        this.elements.startBtn.disabled = false;
+        this.elements.stopBtn.disabled = true;
+        const message = manualStop
+            ? `Partida detenida. Puntaje final: ${this.state.score}`
+            : `¡Tiempo! Lograste ${this.state.score} puntos`;
+        this.showResultBanner(message);
+        this.recordRun(this.state.score);
+        this.handleBonuses();
+        const isRecord = ProfileManager?.updateGameRecord('multiplicationRush', this.state.score);
+        if (isRecord) {
+            this.state.best = this.state.score;
+        } else {
+            if (!this.initialized) return;
+            this.syncBestRecord();
+        }
+        this.updateScoreboard();
+    },
+
+    toggleInputs(enabled) {
+        if (this.elements.answer) this.elements.answer.disabled = !enabled;
+        if (this.elements.submitBtn) this.elements.submitBtn.disabled = !enabled;
+    },
+
+    updateScoreboard() {
+        if (this.elements.score) this.elements.score.textContent = this.state.score;
+        if (this.elements.streak) this.elements.streak.textContent = this.state.streak;
+        if (this.elements.best) this.elements.best.textContent = this.state.best;
+    },
+
+    updateTimerDisplay() {
+        if (!this.elements.timer) return;
+        const minutes = Math.floor(this.state.timeLeft / 60).toString().padStart(2, '0');
+        const seconds = (this.state.timeLeft % 60).toString().padStart(2, '0');
+        this.elements.timer.textContent = `${minutes}:${seconds}`;
+    },
+
+    showMessage(message, type) {
+        if (!this.elements.feedback) return;
+        this.elements.feedback.textContent = message;
+        this.elements.feedback.className = 'feedback-msg';
+        if (type === 'success') this.elements.feedback.classList.add('success');
+        if (type === 'error') this.elements.feedback.classList.add('error');
+    },
+
+    showResultBanner(message) {
+        if (!this.elements.resultBanner) return;
+        this.elements.resultBanner.textContent = message;
+        this.elements.resultBanner.classList.remove('u-hidden');
+    },
+
+    hideResultBanner() {
+        if (this.elements.resultBanner) {
+            this.elements.resultBanner.classList.add('u-hidden');
+            this.elements.resultBanner.textContent = '';
+        }
+    },
+
+    handleBonuses() {
+        if (!this.state.score) return;
+        const stars = Math.floor(this.state.score / 10);
+        if (stars > 0) {
+            ProfileManager?.addProgress(stars, this.state.score);
+            window.notifications.show(`Ganaste ${stars} ⭐ por tu puntaje`, 'success');
+        } else {
+            ProfileManager?.addProgress(0, this.state.score);
+        }
+    },
+
+    recordRun(score) {
+        this.state.recentRuns.unshift({ score, date: new Date().toISOString() });
+        this.state.recentRuns = this.state.recentRuns.slice(0, 5);
+        localStorage.setItem('gameRecentRuns', JSON.stringify(this.state.recentRuns));
+        this.renderHistory();
+    },
+
+    renderHistory() {
+        if (!this.elements.history) return;
+        if (!this.state.recentRuns.length) {
+            this.elements.history.innerHTML = '<li class="empty">Aún no hay partidas. ¡Sé el primero!</li>';
+            return;
+        }
+
+        this.elements.history.innerHTML = this.state.recentRuns.map(run => `
+            <li>
+                <span>${run.score} pts</span>
+                <small>${this.formatDate(run.date)}</small>
+            </li>
+        `).join('');
+    },
+
+    formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleString('es-CO', { hour12: false });
+    }
+};
+
 // Inicialización
 window.UI = UI; // Expose UI globally
 window.DOM = DOM; // Expose DOM globally
+window.GamesModule = GamesModule;
 App.init();
 
 // Funciones Globales (Bridge para onclicks en HTML)

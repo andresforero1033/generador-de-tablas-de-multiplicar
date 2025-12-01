@@ -10,7 +10,10 @@ const ProfileManager = {
         stars: 0,
         trophies: 0,
         exercisesCompleted: 0,
-        badges: []
+        badges: [],
+        gameRecords: {
+            multiplicationRush: 0
+        }
     },
 
     init: () => {
@@ -27,6 +30,12 @@ const ProfileManager = {
             // Try to get username from auth if available
             const authUser = localStorage.getItem('username');
             if (authUser) ProfileManager.data.name = authUser;
+        }
+
+        if (!ProfileManager.data.gameRecords) {
+            ProfileManager.data.gameRecords = { multiplicationRush: 0 };
+        } else if (typeof ProfileManager.data.gameRecords.multiplicationRush !== 'number') {
+            ProfileManager.data.gameRecords.multiplicationRush = 0;
         }
     },
 
@@ -71,6 +80,7 @@ const ProfileManager = {
 
         // Render Badges
         ProfileManager.renderBadges();
+        ProfileManager.renderGameRecords();
     },
 
     renderBadges: () => {
@@ -95,6 +105,24 @@ const ProfileManager = {
             `;
         });
         container.innerHTML = html;
+    },
+
+    renderGameRecords: () => {
+        const container = document.getElementById('game-records');
+        if (!container) return;
+
+        const { gameRecords } = ProfileManager.data;
+        const best = gameRecords?.multiplicationRush || 0;
+
+        container.innerHTML = `
+            <div class="record-card">
+                <div class="record-icon">🎮</div>
+                <div>
+                    <p>Multiplicación Contrarreloj</p>
+                    <strong>${best} pts</strong>
+                </div>
+            </div>
+        `;
     },
 
     toggleNameEdit: () => {
@@ -174,6 +202,25 @@ const ProfileManager = {
         window.notifications.show('¡Nuevo Trofeo Ganado! 🏆', 'success');
         window.sounds.playSuccess();
         ProfileManager.saveData();
+    },
+
+    updateGameRecord: (gameId, score) => {
+        if (!ProfileManager.data.gameRecords) {
+            ProfileManager.data.gameRecords = {};
+        }
+
+        const current = ProfileManager.data.gameRecords[gameId] || 0;
+        if (score > current) {
+            ProfileManager.data.gameRecords[gameId] = score;
+            ProfileManager.saveData();
+            window.notifications.show('¡Nuevo récord desbloqueado! 🎮', 'success');
+            if (window.confetti) {
+                window.confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+            }
+            return true;
+        }
+        ProfileManager.renderGameRecords();
+        return false;
     }
 };
 
@@ -239,6 +286,9 @@ const ModuleManager = {
         // Integration with global UI
         if (typeof UI !== 'undefined') {
             UI.resetViews();
+            if (typeof UI.resetScrollPosition === 'function') {
+                UI.resetScrollPosition();
+            }
             let menuName = '';
             if (moduleName === 'multiplication') menuName = 'multiplicar';
             else if (moduleName === 'division') menuName = 'dividir';
@@ -259,9 +309,12 @@ const ModuleManager = {
             }
         }
 
-        // Show Module Container
+        // Show Module Container and apply theme
         const container = document.getElementById('module-container');
-        if (container) container.classList.remove('u-hidden');
+        if (container) {
+            container.classList.remove('u-hidden');
+            container.setAttribute('data-module-theme', moduleName);
+        }
 
         // Update UI Title
         let title = '';

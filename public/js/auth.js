@@ -7,19 +7,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Theme Logic
     const themeBtn = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('theme');
-    
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        if (themeBtn) themeBtn.textContent = '☀️';
-    }
+    const themeSequence = ['light', 'dark', 'aurora'];
+    let currentTheme = localStorage.getItem('theme') || 'light';
+
+    const themeIcons = {
+        light: '🌙',
+        dark: '⚡',
+        aurora: '☀️'
+    };
+
+    const applyTheme = (theme) => {
+        currentTheme = themeSequence.includes(theme) ? theme : 'light';
+        document.body.classList.remove('dark-mode', 'aurora-mode');
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else if (currentTheme === 'aurora') {
+            document.body.classList.add('aurora-mode');
+        }
+        localStorage.setItem('theme', currentTheme);
+        if (themeBtn) themeBtn.textContent = themeIcons[currentTheme] || '🌙';
+    };
+
+    const getNextTheme = () => {
+        const idx = themeSequence.indexOf(currentTheme);
+        return themeSequence[(idx + 1) % themeSequence.length];
+    };
+
+    applyTheme(currentTheme);
 
     if (themeBtn) {
         themeBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            themeBtn.textContent = isDark ? '☀️' : '🌙';
+            const nextTheme = getNextTheme();
+            applyTheme(nextTheme);
         });
     }
 

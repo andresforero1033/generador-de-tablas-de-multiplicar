@@ -83,6 +83,11 @@
                 <span class="menu-icon">📚</span>
                 <span class="menu-text">Materiales de Aprendizaje</span>
             </button>
+
+            <button id="menu-juegos" class="menu-item" onclick="cambiarModo('juegos')">
+                <span class="menu-icon">🎮</span>
+                <span class="menu-text">Juegos</span>
+            </button>
         </nav>
 
         <button id="desktop-sidebar-toggle" class="desktop-toggle-btn" title="Contraer/Expandir menú" aria-label="Contraer menú">
@@ -207,6 +212,12 @@
                         <div class="badges-grid" id="badges-container">
                             <!-- Badges will be injected here -->
                         </div>
+                        <div class="records-section">
+                            <h4>Records de los juegos</h4>
+                            <div id="game-records" class="records-grid">
+                                <!-- Game records injected here -->
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -311,6 +322,78 @@
                         
                         <button class="calc-btn calc-btn--span-2" onclick="calcNumero(0)">0</button>
                         <button class="calc-btn" onclick="calcNumero('.')">.</button>
+                    </div>
+                </section>
+
+                <!-- Juegos -->
+                <section id="juegos-container" class="u-hidden" aria-label="Modo Juegos">
+                    <div class="game-hero-card">
+                        <div>
+                            <p class="eyebrow">Nuevo</p>
+                            <h2>Multiplicación Contrarreloj</h2>
+                            <p>Responde tantas multiplicaciones como puedas en 60 segundos. Cada acierto suma 1 punto y los récords se guardan en tu perfil.</p>
+                        </div>
+                        <div class="game-hero-actions">
+                            <div class="hero-score">
+                                <span>Récord personal</span>
+                                <strong id="game-best">0</strong>
+                            </div>
+                            <button id="game-start-btn" class="action-btn">Iniciar reto</button>
+                            <button id="game-stop-btn" class="action-btn btn-secondary" disabled>Terminar</button>
+                        </div>
+                    </div>
+
+                    <div class="game-info-grid">
+                        <article class="game-info-card">
+                            <h3>Cómo jugar</h3>
+                            <ul>
+                                <li>Presiona "Iniciar reto" para comenzar el conteo.</li>
+                                <li>Ingresa tu respuesta y presiona Enter o "Comprobar".</li>
+                                <li>Cada acierto suma puntos y genera una nueva multiplicación.</li>
+                            </ul>
+                        </article>
+                        <article class="game-info-card">
+                            <h3>Bonos y trofeos</h3>
+                            <p>Obtén estrellas extra cada 10 respuestas correctas. Si superas tu récord personal activarás confeti y sumarás logros.</p>
+                        </article>
+                    </div>
+
+                    <div class="game-layout">
+                        <article class="game-panel">
+                            <div class="game-metrics">
+                                <div>
+                                    <span>Tiempo</span>
+                                    <strong id="game-timer">01:00</strong>
+                                </div>
+                                <div>
+                                    <span>Puntaje</span>
+                                    <strong id="game-score">0</strong>
+                                </div>
+                                <div>
+                                    <span>Racha</span>
+                                    <strong id="game-streak">0</strong>
+                                </div>
+                            </div>
+
+                            <div class="game-question-box">
+                                <p class="muted">Resuelve:</p>
+                                <div id="game-question" class="game-question">Pulsa iniciar para comenzar</div>
+                                <div class="answer-group">
+                                    <input type="number" id="game-answer" placeholder="Tu respuesta" disabled aria-label="Respuesta del juego">
+                                    <button id="game-submit-btn" class="action-btn" disabled>Comprobar</button>
+                                </div>
+                                <p id="game-feedback" class="feedback-msg"></p>
+                            </div>
+
+                            <div id="game-result-banner" class="game-result-banner u-hidden" aria-live="polite"></div>
+                        </article>
+
+                        <aside class="game-side-panel">
+                            <h3>Últimos intentos</h3>
+                            <ul id="game-history" class="game-history-list">
+                                <li class="empty">Aún no hay partidas. ¡Sé el primero!</li>
+                            </ul>
+                        </aside>
                     </div>
                 </section>
 
