@@ -1733,6 +1733,13 @@ select:focus {
     color: var(--color-text-light);
 }
 
+.dev-credit {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
 /* =========================================
    Nuevas Secciones (Sobre Nosotros, Servicios, etc)
    ========================================= */
