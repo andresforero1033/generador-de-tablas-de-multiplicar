@@ -1027,6 +1027,8 @@ const ModuleManager = {
         ModuleManager.state.exam.isActive = true;
         ModuleManager.state.exam.submitted = false;
         ModuleManager.state.exam.currentQuestionIndex = 0; // Reset index
+        ModuleManager.state.exam.timeLeft = time > 0 ? time * 60 : 0;
+        ModuleManager.stopExamTimer();
 
         // Generate Questions
         for(let i=0; i<count; i++) {
@@ -1062,6 +1064,7 @@ const ModuleManager = {
         }
 
         ModuleManager.renderExamInterface();
+        ModuleManager.startExamTimer();
     },
 
     renderExamInterface: () => {
@@ -1123,6 +1126,72 @@ const ModuleManager = {
 
         container.innerHTML = html;
         ModuleManager.renderCurrentQuestion();
+        ModuleManager.updateExamTimerDisplay();
+    },
+
+    startExamTimer: () => {
+        const examState = ModuleManager.state.exam;
+        const timeLimit = examState.config.timeLimit;
+
+        // Always refresh UI text even if there is no limit
+        ModuleManager.updateExamTimerDisplay();
+
+        if (!examState.isActive || !timeLimit || timeLimit <= 0) {
+            return;
+        }
+
+        if (examState.timerInterval) {
+            return; // Timer already running
+        }
+
+        if (!examState.timeLeft || examState.timeLeft <= 0) {
+            examState.timeLeft = timeLimit * 60;
+        }
+
+        examState.timerInterval = setInterval(() => {
+            examState.timeLeft = Math.max(0, examState.timeLeft - 1);
+            ModuleManager.updateExamTimerDisplay();
+
+            if (examState.timeLeft === 0) {
+                ModuleManager.stopExamTimer();
+                if (window.notifications && typeof window.notifications.show === 'function') {
+                    window.notifications.show('El tiempo ha finalizado. Enviando examen...', 'warning');
+                }
+                ModuleManager.submitExam(true);
+            }
+        }, 1000);
+    },
+
+    stopExamTimer: () => {
+        const examState = ModuleManager.state.exam;
+        if (examState.timerInterval) {
+            clearInterval(examState.timerInterval);
+            examState.timerInterval = null;
+        }
+    },
+
+    updateExamTimerDisplay: () => {
+        const timerEl = document.getElementById('exam-timer');
+        if (!timerEl) return;
+
+        const examState = ModuleManager.state.exam;
+        const timeLimit = examState.config.timeLimit;
+
+        if (!examState.isActive) {
+            timerEl.textContent = 'Tiempo: --:--';
+            return;
+        }
+
+        if (!timeLimit || timeLimit <= 0) {
+            timerEl.textContent = 'Tiempo: Sin límite';
+            return;
+        }
+
+        const totalSeconds = Math.max(0, examState.timeLeft);
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+
+        timerEl.textContent = `Tiempo: ${minutes}:${seconds}`;
     },
 
     renderCurrentQuestion: () => {
@@ -1223,12 +1292,13 @@ const ModuleManager = {
         if (progressEl) progressEl.textContent = `${answeredCount} / ${ModuleManager.state.exam.questions.length} Respondidas`;
     },
 
-    submitExam: () => {
-        if(!confirm('¿Estás seguro de enviar el examen? Podrás revisar tus respuestas.')) return;
+    submitExam: (autoSubmit = false) => {
+        if(!autoSubmit && !confirm('¿Estás seguro de enviar el examen? Podrás revisar tus respuestas.')) return;
         
         ModuleManager.state.exam.isActive = false;
         ModuleManager.state.exam.submitted = true;
         ModuleManager.state.exam.attempts++;
+        ModuleManager.stopExamTimer();
         
         // Grading
         let correctCount = 0;

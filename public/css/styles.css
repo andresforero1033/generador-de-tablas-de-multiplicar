@@ -92,6 +92,9 @@ body.aurora-mode {
     --color-border: #ffffff1f;
     --module-theme-color: #ff5f6d;
     --module-theme-color-dark: #e04652;
+    --aurora-text-on-light: #062437;
+    --aurora-surface-light: rgba(255, 255, 255, 0.94);
+    --aurora-border-light: rgba(255, 255, 255, 0.35);
 
     background: linear-gradient(135deg, #012a36 0%, #003654 40%, #441b63 100%);
     color: var(--color-text-main);
@@ -172,6 +175,67 @@ body.aurora-mode .record-icon {
     text-shadow: 0 0 12px rgba(44, 230, 167, 0.6);
 }
 
+body.dark-mode .badge,
+body.aurora-mode .badge {
+    background: rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 25px rgba(2, 6, 23, 0.4);
+}
+
+body.dark-mode .badge.unlocked,
+body.aurora-mode .badge.unlocked {
+    background: linear-gradient(145deg, rgba(255, 95, 109, 0.22), rgba(44, 230, 167, 0.18));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 45px rgba(1, 4, 20, 0.6);
+}
+
+body.dark-mode .badge span,
+body.aurora-mode .badge span {
+    color: var(--color-text-main);
+}
+
+body.dark-mode .badge-icon,
+body.aurora-mode .badge-icon {
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+}
+
+body.dark-mode .sets-analysis,
+body.dark-mode .ws-item.sets-ws-item {
+    background: var(--color-bg-card);
+    border-color: var(--color-border);
+    box-shadow: var(--box-shadow-hover);
+}
+
+body.dark-mode .ws-sets-data {
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+}
+
+body.dark-mode .record-card {
+    background: rgba(45, 43, 85, 0.85);
+    border-color: var(--color-border);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+}
+
+body.aurora-mode .sets-analysis,
+body.aurora-mode .ws-item.sets-ws-item,
+body.aurora-mode .record-card {
+    background: rgba(5, 17, 32, 0.75);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 45px rgba(1, 10, 20, 0.6);
+}
+
+body.aurora-mode .records-section {
+    background: transparent;
+    border-radius: 20px;
+    padding: 0.5rem;
+}
+
+body.aurora-mode .ws-sets-data {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 body.aurora-mode .toast {
     background: rgba(15, 23, 42, 0.9);
     border: 1px solid var(--color-border);
@@ -179,6 +243,69 @@ body.aurora-mode .toast {
 
 body.aurora-mode .toast.toast-success {
     box-shadow: 0 0 20px rgba(44, 230, 167, 0.45);
+}
+
+body.aurora-mode input[type="number"],
+body.aurora-mode input[type="text"],
+body.aurora-mode input[type="password"],
+body.aurora-mode select,
+body.aurora-mode textarea {
+    color: var(--aurora-text-on-light);
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+body.aurora-mode input:focus,
+body.aurora-mode select:focus,
+body.aurora-mode textarea:focus {
+    background-color: var(--aurora-surface-light);
+    color: var(--aurora-text-on-light);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 95, 109, 0.35);
+}
+
+body.aurora-mode .calc-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-main);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.aurora-mode .calc-btn:hover,
+body.aurora-mode .calc-btn:focus {
+    background-color: var(--aurora-surface-light);
+    color: var(--aurora-text-on-light);
+    box-shadow: 0 10px 20px rgba(1, 42, 54, 0.35);
+}
+
+body.aurora-mode .calc-btn.operator {
+    background-color: rgba(255, 95, 109, 0.08);
+    color: #ffd4db;
+}
+
+body.aurora-mode .calc-btn.operator:hover {
+    color: var(--aurora-text-on-light);
+}
+
+body.aurora-mode .calc-btn.clear {
+    background-color: rgba(255, 118, 117, 0.15);
+    color: #ffe2e1;
+}
+
+body.aurora-mode .calc-btn.clear:hover {
+    color: var(--aurora-text-on-light);
+}
+
+body.aurora-mode .calc-btn.equal {
+    color: #031a29;
+}
+
+body.aurora-mode .ejemplo-box,
+body.aurora-mode #procesos-division {
+    background-color: var(--aurora-surface-light);
+    color: var(--aurora-text-on-light);
+    border-color: var(--aurora-border-light);
+    background-image: linear-gradient(rgba(3, 26, 41, 0.12) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(3, 26, 41, 0.12) 1px, transparent 1px);
 }
 
 body.dark-mode .sidebar {
@@ -876,6 +1003,18 @@ select:focus {
 
 .action-btn:active {
     transform: scale(0.98);
+}
+
+@keyframes buttonBounceTap {
+    0% { transform: translateY(0) scale(1); }
+    25% { transform: translateY(2px) scale(0.97); }
+    55% { transform: translateY(-3px) scale(1.03); }
+    80% { transform: translateY(1px) scale(0.99); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+.btn-bounce-animation {
+    animation: buttonBounceTap 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .btn-success {

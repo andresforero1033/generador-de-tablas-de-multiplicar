@@ -304,6 +304,17 @@ class Calculator {
  * Maneja la interacción con el DOM y la navegación.
  */
 const UI = {
+    applyButtonBounce: (button) => {
+        if (!button) return;
+        button.classList.remove('btn-bounce-animation');
+        // Force reflow so animation can replay even on rapid clicks.
+        void button.offsetWidth;
+        button.classList.add('btn-bounce-animation');
+        button.addEventListener('animationend', () => {
+            button.classList.remove('btn-bounce-animation');
+        }, { once: true });
+    },
+
     resetScrollPosition: () => {
         // Asegura que el contenido principal comience desde arriba en cada navegación
         const mainArea = document.querySelector('.main-content');
@@ -895,7 +906,11 @@ const App = {
         // Global Sound Listeners
         document.addEventListener('click', (e) => {
             // Play click sound for buttons and interactive elements
-            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.card') || e.target.closest('.menu-item')) {
+            const btn = e.target.closest('button');
+            if (btn) {
+                UI.applyButtonBounce(btn);
+            }
+            if (btn || e.target.closest('a') || e.target.closest('.card') || e.target.closest('.menu-item')) {
                 window.sounds.playClick();
             }
         });

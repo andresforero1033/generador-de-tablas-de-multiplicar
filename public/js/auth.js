@@ -42,6 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const triggerBounce = (button) => {
+        if (!button) return;
+        button.classList.remove('btn-bounce-animation');
+        void button.offsetWidth;
+        button.classList.add('btn-bounce-animation');
+        button.addEventListener('animationend', () => {
+            button.classList.remove('btn-bounce-animation');
+        }, { once: true });
+    };
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (btn) triggerBounce(btn);
+    });
+
     // 3D Flip Logic
     const authCard = document.getElementById('auth-card');
     const toRegisterBtn = document.getElementById('to-register');
