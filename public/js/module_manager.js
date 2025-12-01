@@ -3,6 +3,20 @@
  * Handles user profile, avatar, and stats.
  */
 const ProfileManager = {
+    DEFAULT_PROFILE: {
+        name: 'Explorador',
+        avatar: '🦁',
+        level: 1,
+        stars: 0,
+        trophies: 0,
+        exercisesCompleted: 0,
+        badges: [],
+        gameRecords: {
+            multiplicationRush: 0
+        },
+        history: []
+    },
+
     data: {
         name: 'Explorador',
         avatar: '🦁',
@@ -13,35 +27,203 @@ const ProfileManager = {
         badges: [],
         gameRecords: {
             multiplicationRush: 0
+        },
+        history: []
+    },
+
+    ready: false,
+
+    init: async () => {
+        await ProfileManager.loadData();
+        ProfileManager.renderProfile();
+        ProfileManager.ready = true;
+        ProfileManager.dispatchEvent('profile:ready');
+    },
+
+    dispatchEvent: (name) => {
+        document.dispatchEvent(new CustomEvent(name, { detail: ProfileManager.data }));
+    },
+
+    normalizeProfile: (profile = {}) => {
+        const normalized = {
+            ...ProfileManager.DEFAULT_PROFILE,
+            ...profile
+        };
+        normalized.gameRecords = {
+            ...ProfileManager.DEFAULT_PROFILE.gameRecords,
+            ...(profile.gameRecords || {})
+        };
+        normalized.history = Array.isArray(profile.history) ? profile.history : [];
+        return normalized;
+    },
+
+    persistLocalCache: () => {
+        try {
+            localStorage.setItem('userProfile', JSON.stringify(ProfileManager.data));
+        } catch (error) {
+            console.warn('No se pudo guardar el perfil localmente', error);
         }
     },
 
-    init: () => {
-        ProfileManager.loadData();
-        ProfileManager.renderProfile();
-    },
-
-    loadData: () => {
+    loadFromLocal: () => {
         const saved = localStorage.getItem('userProfile');
         if (saved) {
-            ProfileManager.data = JSON.parse(saved);
-        } else {
-            // Default data already set
-            // Try to get username from auth if available
-            const authUser = localStorage.getItem('username');
-            if (authUser) ProfileManager.data.name = authUser;
+            try {
+                ProfileManager.data = ProfileManager.normalizeProfile(JSON.parse(saved));
+                return;
+            } catch (error) {
+                console.warn('No se pudo leer el perfil local', error);
+            }
+        }
+        ProfileManager.data = { ...ProfileManager.DEFAULT_PROFILE };
+        const authUser = localStorage.getItem('username');
+        if (authUser) ProfileManager.data.name = authUser;
+    },
+
+    loadData: async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            ProfileManager.loadFromLocal();
+            return;
         }
 
-        if (!ProfileManager.data.gameRecords) {
-            ProfileManager.data.gameRecords = { multiplicationRush: 0 };
-        } else if (typeof ProfileManager.data.gameRecords.multiplicationRush !== 'number') {
-            ProfileManager.data.gameRecords.multiplicationRush = 0;
+        try {
+            const response = await fetch('/api/profile', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401) {
+                ProfileManager.handleUnauthorized();
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('No se pudo obtener el perfil');
+            }
+
+            const payload = await response.json();
+            ProfileManager.data = ProfileManager.normalizeProfile(payload.profile);
+            ProfileManager.persistLocalCache();
+        } catch (error) {
+            console.error('No se pudo sincronizar el perfil', error);
+            ProfileManager.loadFromLocal();
         }
     },
 
-    saveData: () => {
-        localStorage.setItem('userProfile', JSON.stringify(ProfileManager.data));
-        ProfileManager.renderProfile(); // Update UI
+    handleUnauthorized: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userProfile');
+        window.location.href = '/';
+    },
+
+    getSerializableProfile: () => {
+        const { name, avatar, level, stars, trophies, exercisesCompleted, gameRecords } = ProfileManager.data;
+        return { name, avatar, level, stars, trophies, exercisesCompleted, gameRecords };
+    },
+
+    saveData: async () => {
+        ProfileManager.persistLocalCache();
+        ProfileManager.renderProfile();
+        ProfileManager.dispatchEvent('profile:updated');
+
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ profile: ProfileManager.getSerializableProfile() })
+            });
+
+            if (response.status === 401) {
+                ProfileManager.handleUnauthorized();
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('No se pudo actualizar el perfil');
+            }
+
+            const payload = await response.json();
+            ProfileManager.data = ProfileManager.normalizeProfile(payload.profile);
+            ProfileManager.persistLocalCache();
+            ProfileManager.renderProfile();
+            ProfileManager.dispatchEvent('profile:updated');
+        } catch (error) {
+            console.error('Error sincronizando el perfil con el servidor', error);
+        }
+    },
+
+    addHistoryEntry: async (type, payload = {}) => {
+        if (!type) return;
+        if (!Array.isArray(ProfileManager.data.history)) {
+            ProfileManager.data.history = [];
+        }
+
+        const entry = {
+            clientId: ProfileManager.generateClientId(),
+            type,
+            module: payload.module || 'general',
+            score: typeof payload.score === 'number' ? payload.score : 0,
+            totalQuestions: typeof payload.totalQuestions === 'number' ? payload.totalQuestions : undefined,
+            grade: typeof payload.grade === 'number' ? payload.grade : undefined,
+            meta: payload.meta || {},
+            createdAt: new Date().toISOString()
+        };
+
+        ProfileManager.data.history.unshift(entry);
+        ProfileManager.data.history = ProfileManager.data.history.slice(0, 50);
+        ProfileManager.persistLocalCache();
+        ProfileManager.dispatchEvent('profile:updated');
+
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/profile/history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ entry })
+            });
+
+            if (response.status === 401) {
+                ProfileManager.handleUnauthorized();
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('No se pudo guardar el historial');
+            }
+
+            const payload = await response.json();
+            if (Array.isArray(payload.history)) {
+                ProfileManager.data.history = payload.history.map((item) => ({
+                    ...item,
+                    createdAt: item.createdAt || new Date().toISOString()
+                }));
+                ProfileManager.persistLocalCache();
+                ProfileManager.dispatchEvent('profile:updated');
+            }
+        } catch (error) {
+            console.error('Error sincronizando el historial', error);
+        }
+    },
+
+    generateClientId: () => {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return window.crypto.randomUUID();
+        }
+        return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     },
 
     renderProfile: () => {
@@ -1347,10 +1529,10 @@ const ModuleManager = {
             }, 500);
         }
         
-        ModuleManager.renderExamResults(grade);
+        ModuleManager.renderExamResults(grade, correctCount);
     },
 
-    renderExamResults: (grade) => {
+    renderExamResults: (grade, correctCount = 0) => {
         const container = document.getElementById('exam-content');
         let status = '';
         let statusClass = '';
@@ -1358,6 +1540,20 @@ const ModuleManager = {
         if (grade < 3.5) { status = 'Reprobado'; statusClass = 'score-bad'; }
         else if (grade < 4.5) { status = 'Aprobado (Bueno)'; statusClass = 'score-good'; }
         else { status = 'Aprobado (Excelente)'; statusClass = 'score-excellent'; }
+
+        const totalQuestions = ModuleManager.state.exam.questions.length;
+        if (window.ProfileManager && typeof ProfileManager.addHistoryEntry === 'function') {
+            ProfileManager.addHistoryEntry('exam', {
+                module: ModuleManager.currentModule,
+                score: correctCount,
+                totalQuestions,
+                grade,
+                meta: {
+                    timeLimit: ModuleManager.state.exam.config.timeLimit,
+                    submittedAt: new Date().toISOString()
+                }
+            });
+        }
 
         let html = `
             <div class="exam-results">

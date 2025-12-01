@@ -1144,14 +1144,17 @@ const GamesModule = {
     },
 
     loadPersistentData() {
-        try {
-            const savedRuns = JSON.parse(localStorage.getItem('gameRecentRuns') || '[]');
-            if (Array.isArray(savedRuns)) {
-                this.state.recentRuns = savedRuns;
+        this.syncHistoryFromProfile();
+        if (!this.state.recentRuns.length) {
+            try {
+                const savedRuns = JSON.parse(localStorage.getItem('gameRecentRuns') || '[]');
+                if (Array.isArray(savedRuns)) {
+                    this.state.recentRuns = savedRuns;
+                }
+            } catch (error) {
+                console.warn('No se pudieron cargar los intentos previos del juego', error);
+                this.state.recentRuns = [];
             }
-        } catch (error) {
-            console.warn('No se pudieron cargar los intentos previos del juego', error);
-            this.state.recentRuns = [];
         }
         this.syncBestRecord();
         this.renderHistory();
@@ -1343,10 +1346,22 @@ const GamesModule = {
     },
 
     recordRun(score) {
-        this.state.recentRuns.unshift({ score, date: new Date().toISOString() });
+        const runEntry = { score, date: new Date().toISOString() };
+        this.state.recentRuns.unshift(runEntry);
         this.state.recentRuns = this.state.recentRuns.slice(0, 5);
-        localStorage.setItem('gameRecentRuns', JSON.stringify(this.state.recentRuns));
+        try {
+            localStorage.setItem('gameRecentRuns', JSON.stringify(this.state.recentRuns));
+        } catch (error) {
+            console.warn('No se pudo guardar el historial local del juego', error);
+        }
         this.renderHistory();
+        if (window.ProfileManager && typeof ProfileManager.addHistoryEntry === 'function') {
+            ProfileManager.addHistoryEntry('game', {
+                module: 'multiplicationRush',
+                score,
+                meta: { duration: this.config.duration }
+            });
+        }
     },
 
     renderHistory() {
@@ -1367,6 +1382,20 @@ const GamesModule = {
     formatDate(isoString) {
         const date = new Date(isoString);
         return date.toLocaleString('es-CO', { hour12: false });
+    },
+
+    syncHistoryFromProfile() {
+        if (!window.ProfileManager || !Array.isArray(ProfileManager.data?.history)) return;
+        const runs = ProfileManager.data.history
+            .filter((entry) => entry.type === 'game' && entry.module === 'multiplicationRush')
+            .map((entry) => ({
+                score: entry.score,
+                date: entry.createdAt || entry.date || new Date().toISOString()
+            }))
+            .slice(0, 5);
+        if (!runs.length) return;
+        this.state.recentRuns = runs;
+        this.renderHistory();
     }
 };
 
@@ -1375,6 +1404,21 @@ window.UI = UI; // Expose UI globally
 window.DOM = DOM; // Expose DOM globally
 window.GamesModule = GamesModule;
 App.init();
+
+// Sincronizar módulos de juego cuando el perfil esté disponible/actualizado
+document.addEventListener('profile:ready', () => {
+    if (window.GamesModule) {
+        window.GamesModule.syncBestRecord();
+        window.GamesModule.syncHistoryFromProfile();
+    }
+});
+
+document.addEventListener('profile:updated', () => {
+    if (window.GamesModule) {
+        window.GamesModule.syncBestRecord();
+        window.GamesModule.syncHistoryFromProfile();
+    }
+});
 
 // Funciones Globales (Bridge para onclicks en HTML)
 // Nota: Idealmente se usarían event listeners, pero mantenemos compatibilidad con el HTML existente
@@ -1412,6 +1456,8 @@ window.logout = async () => {
     if(confirmed) {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
+        localStorage.removeItem('userProfile');
+        localStorage.removeItem('gameRecentRuns');
         window.location.href = '/';
     }
 };

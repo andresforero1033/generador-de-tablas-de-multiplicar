@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.error || 'Error en el inicio de sesión');
                 }
                 
+                localStorage.removeItem('userProfile');
+                localStorage.removeItem('gameRecentRuns');
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('username', data.username);
                 
