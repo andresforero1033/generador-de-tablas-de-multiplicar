@@ -184,6 +184,22 @@ Define un archivo `.env` en la raíz con las siguientes claves:
 - Internacionalizar la interfaz para soportar inglés y portugués.
 - Añadir más módulos teóricos (fracciones avanzadas, álgebra básica) con sus respectivos juegos.
 
+## 🔍 Estrategia SEO y Contenido
+
+### Metadatos y estructura técnica
+- La SPA (`public/index.html`) y la vista pública (`public/login.html`) ahora incluyen títulos, descripciones largas, keywords y etiquetas sociales orientadas a la palabra clave **“Creative”**, además de etiquetas `canonical`, `alternate` y `robots` para guiar a los motores de búsqueda.
+- Se añadieron tarjetas Open Graph + Twitter Card, lo que mejora los _snippets_ cuando se comparte Creative en redes.
+- Se incorporó _structured data_ JSON-LD (`EducationalOrganization` y `WebSite`) con relación explícita a **Devora Software Inc.**, ayudando a Google a comprender la marca.
+- Mantén el dominio público sirviendo siempre vía HTTPS (`https://creativebymariana.com`) para que las señales de canonicalidad y la indexación sean consistentes.
+
+### Recomendaciones on-page
+- **Estructura de URLs:** idealmente expón rutas semánticas (`/app/multiplicacion`, `/app/juegos`, `/app/aprendizaje/guia-tablas`) en lugar de solo `#` o controladores JS. Puedes hacer `app/:section` en Express y mapearlo a la misma SPA para que los buscadores rastreen cada módulo.
+- **Encabezados:** garantiza que exista un único `h1` (“Creative | Plataforma Educativa de Matemáticas”) en cada vista y usa `h2/h3` para módulos (Perfil, Juegos, Herramientas) para reforzar las palabras clave.
+- **Contenido descriptivo:** agrega copys introductorios en cada sección explicando el beneficio (“Creative Multiplicación: práctica guiada con pasos”). Esto genera densidad semántica natural sin _keyword stuffing_.
+- **Enlaces internos:** enlaza desde tarjetas y botones del dashboard hacia las rutas descritas arriba (por ejemplo, `<a href="/app/juegos">Ir a Juegos Creative</a>`). Esto reparte autoridad entre secciones clave.
+- **Activos multimedia:** sirve un `og:image` real (1200×630) optimizado y nómbralo con la keyword (`creative-platform-cover.png`). Compleméntalo con texto alternativo descriptivo.
+- **Rendimiento e indexabilidad:** genera un `sitemap.xml` y un `robots.txt` sencillo (`User-agent: * / Allow: /`) desde Express para agilizar el descubrimiento. Mantén pesos de CSS/JS minificados para mejorar Core Web Vitals.
+
 ## 🤝 Contribución
 
 ¡Las contribuciones son bienvenidas! Si tienes ideas para mejorar la aplicación, por favor abre un "Issue" o envía un "Pull Request".

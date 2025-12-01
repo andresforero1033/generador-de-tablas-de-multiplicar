@@ -7,6 +7,18 @@ const path = require('path');
 const User = require('./models/User');
 
 const app = express();
+const SITE_URL = process.env.SITE_URL || 'https://creativebymariana.com';
+const LOGIN_VIEW_PATH = path.join(__dirname, 'public', 'login.html');
+const APP_VIEW_PATH = path.join(__dirname, 'public', 'index.html');
+const APP_ROUTES = [
+    '/app',
+    '/app/multiplicacion',
+    '/app/division',
+    '/app/juegos',
+    '/app/herramientas',
+    '/app/aprendizaje',
+    '/app/perfil'
+];
 
 // Middleware
 app.use(cors());
@@ -60,12 +72,13 @@ const authenticate = (req, res, next) => {
 
 // Rutas de Vistas (Mover arriba para prioridad)
 app.get('/', (req, res) => {
-    const loginPath = path.join(__dirname, 'public', 'login.html');
-    res.sendFile(loginPath);
+    res.sendFile(LOGIN_VIEW_PATH);
 });
 
-app.get('/app', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+APP_ROUTES.forEach((route) => {
+    app.get(route, (req, res) => {
+        res.sendFile(APP_VIEW_PATH);
+    });
 });
 
 // Conexión a MongoDB (No bloqueante)
@@ -195,6 +208,49 @@ app.post('/api/profile/history', authenticate, async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'No se pudo actualizar el historial' });
     }
+});
+
+app.get('/robots.txt', (req, res) => {
+    const robotsBody = [
+        'User-agent: *',
+        'Allow: /',
+        `Sitemap: ${SITE_URL}/sitemap.xml`
+    ].join('\n');
+    res.type('text/plain').send(robotsBody);
+});
+
+app.get('/sitemap.xml', (req, res) => {
+    const now = new Date().toISOString();
+    const baseEntries = [
+        { loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0' },
+        { loc: `${SITE_URL}/app`, changefreq: 'weekly', priority: '0.9' }
+    ];
+
+    const moduleEntries = APP_ROUTES
+        .filter((route) => route !== '/app')
+        .map((route) => ({
+            loc: `${SITE_URL}${route}`,
+            changefreq: 'monthly',
+            priority: '0.7'
+        }));
+
+    const urls = [...baseEntries, ...moduleEntries]
+        .map(({ loc, changefreq, priority }) => (
+            `    <url>\n` +
+            `        <loc>${loc}</loc>\n` +
+            `        <lastmod>${now}</lastmod>\n` +
+            `        <changefreq>${changefreq}</changefreq>\n` +
+            `        <priority>${priority}</priority>\n` +
+            `    </url>`
+        ))
+        .join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+        `${urls}\n` +
+        `</urlset>`;
+
+    res.type('application/xml').send(xml);
 });
 
 // Rutas de Vistas
