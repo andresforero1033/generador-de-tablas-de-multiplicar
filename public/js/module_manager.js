@@ -113,6 +113,9 @@ const ProfileManager = {
     },
 
     handleUnauthorized: () => {
+        if (typeof UI !== 'undefined' && typeof UI.clearViewState === 'function') {
+            UI.clearViewState();
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('userProfile');
@@ -447,6 +450,165 @@ const ModuleManager = {
         }
     },
 
+    contextualScenarioBank: {
+        multiplication: [
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Compras ${a} cajas y cada una trae ${b} galletas frescas.`,
+                    question: '¿Cuántas galletas tendrás al llegar a casa?',
+                    tip: 'Multiplica el número de cajas por el contenido de cada una.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Una maestra organiza ${a} filas con ${b} estudiantes en cada fila para el acto cultural.`,
+                    question: '¿Cuántos estudiantes participan en total?',
+                    tip: 'Piensa en filas repetidas: filas × estudiantes por fila.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Cada estante puede guardar ${b} libros y en la biblioteca se llenan ${a} estantes completos.`,
+                    question: '¿Cuántos libros están ordenados?',
+                    tip: 'Multiplica estantes por libros por estante.'
+                })
+            }
+        ],
+        addition: [
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Camila recorrió ${a} km en la mañana y ${b} km en la tarde.` ,
+                    question: '¿Qué distancia total caminó en el día?',
+                    tip: 'Suma los kilómetros de ambos momentos.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Ahorras ${a} monedas esta semana y tu familia te regala ${b} monedas más.`,
+                    question: '¿Con cuántas monedas cuentas ahora?',
+                    tip: 'Une ambos montos para obtener el total.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                template: ({ a, b }) => ({
+                    description: `Una receta usa ${a} gramos de harina y agregas ${b} gramos adicionales para duplicar la mezcla.`,
+                    question: '¿Cuánta harina empleaste en total?',
+                    tip: 'Suma la medida base más el refuerzo.'
+                })
+            }
+        ],
+        subtraction: [
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ a, b }) => a >= b,
+                template: ({ a, b }) => ({
+                    description: `Había ${a} entradas disponibles para un concierto y ya se vendieron ${b}.`,
+                    question: '¿Cuántas entradas quedan por vender?',
+                    tip: 'Resta las vendidas del total inicial.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ a, b }) => a >= b,
+                template: ({ a, b }) => ({
+                    description: `Un tanque almacenaba ${a} litros de agua y se utilizaron ${b} litros para regar el huerto.`,
+                    question: '¿Cuánta agua permanece en el tanque?',
+                    tip: 'Compara lo que había con lo que salió.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ a, b }) => a >= b,
+                template: ({ a, b }) => ({
+                    description: `Preparaste ${a} galletas y regalaste ${b} a tus vecinos.`,
+                    question: '¿Cuántas galletas te quedaron?',
+                    tip: 'Resta las que entregaste de las preparadas.'
+                })
+            }
+        ],
+        division: [
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ b }) => b !== 0,
+                template: ({ a, b }) => ({
+                    description: `Tienes ${a} caramelos y deseas repartirlos en partes iguales entre ${b} amigos.`,
+                    question: '¿Cuántos caramelos recibe cada persona?',
+                    tip: 'Divide la cantidad total entre el número de personas.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ b }) => b !== 0,
+                template: ({ a, b }) => ({
+                    description: `Un viaje de ${a} km se completa en ${b} horas.` ,
+                    question: '¿Cuál fue la velocidad promedio en km por hora?',
+                    tip: 'Divide la distancia entre el tiempo.'
+                })
+            },
+            {
+                supports: ['N', 'Z'],
+                requirePositive: true,
+                condition: ({ b }) => b !== 0,
+                template: ({ a, b }) => ({
+                    description: `Dispones de ${a} adhesivos y deseas guardarlos en paquetes de ${b} unidades.`,
+                    question: '¿Cuántos paquetes completos puedes formar?',
+                    tip: 'Divide la cantidad total entre la capacidad de cada paquete.'
+                })
+            }
+        ]
+    },
+
+    extractNumericValue: (value) => {
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return value;
+        }
+        if (value && typeof value === 'object' && typeof value.num === 'number' && typeof value.den === 'number' && value.den !== 0) {
+            return value.num / value.den;
+        }
+        return null;
+    },
+
+    buildContextualScenario: (problem, solution) => {
+        const bank = ModuleManager.contextualScenarioBank[ModuleManager.currentModule];
+        if (!bank) return null;
+
+        const a = ModuleManager.extractNumericValue(problem.a);
+        const b = ModuleManager.extractNumericValue(problem.b);
+        const result = typeof solution.result === 'number' ? solution.result : null;
+
+        if (a === null || b === null) {
+            return null;
+        }
+
+        const eligible = bank.filter((entry) => {
+            if (entry.supports && !entry.supports.includes(problem.type)) return false;
+            if (entry.requirePositive && (a <= 0 || b <= 0)) return false;
+            if (entry.condition && !entry.condition({ a, b, result })) return false;
+            return true;
+        });
+
+        if (!eligible.length) return null;
+        const pick = eligible[MathCore.randomInt(0, eligible.length - 1)];
+        return pick.template({ a, b, result });
+    },
+
     init: () => {
         // Render initial structure if needed, or bind events
         ModuleManager.bindEvents();
@@ -494,7 +656,7 @@ const ModuleManager = {
         // Show Module Container and apply theme
         const container = document.getElementById('module-container');
         if (container) {
-            container.classList.remove('u-hidden');
+            UI.toggleElement(container, true);
             container.setAttribute('data-module-theme', moduleName);
         }
 
@@ -521,11 +683,11 @@ const ModuleManager = {
         document.querySelector(`.module-tab[data-tab="${tabName}"]`).classList.add('active');
 
         // Hide all content sections
-        document.querySelectorAll('.module-section').forEach(s => s.classList.add('u-hidden'));
+        document.querySelectorAll('.module-section').forEach(section => UI.toggleElement(section, false));
         
         // Show target section
         const targetSection = document.getElementById(`section-${tabName}`);
-        if (targetSection) targetSection.classList.remove('u-hidden');
+        if (targetSection) UI.toggleElement(targetSection, true);
 
         // Render specific content
         if (tabName === 'explicacion') ModuleManager.renderExplanation();
@@ -533,6 +695,10 @@ const ModuleManager = {
         if (tabName === 'practica') ModuleManager.renderPractice();
         if (tabName === 'talleres') ModuleManager.renderWorkshops();
         if (tabName === 'examen') ModuleManager.renderExamSetup();
+
+        if (typeof UI !== 'undefined' && typeof UI.persistViewState === 'function') {
+            UI.persistViewState({ type: 'module', module: ModuleManager.currentModule, tab: ModuleManager.currentTab });
+        }
     },
 
     // ==========================================
@@ -849,6 +1015,14 @@ const ModuleManager = {
         
         const problem = MathCore.generateOperation(ModuleManager.currentModule, type, diff);
         const solution = MathCore.solve(problem);
+        const scenario = ModuleManager.buildContextualScenario(problem, solution);
+        const scenarioHtml = scenario ? `
+            <div class="practice-context">
+                <p>${scenario.description}</p>
+                <p class="practice-context__question">${scenario.question}</p>
+                ${scenario.tip ? `<p class="practice-context__tip">Pista: ${scenario.tip}</p>` : ''}
+            </div>
+        ` : '';
         
         // Guardar pregunta actual
         practice.questions.push({ problem, solution });
@@ -865,6 +1039,7 @@ const ModuleManager = {
                 <div class="practice-header">
                     <span>Ejercicio ${practice.currentQuestionIndex + 1} de ${practice.totalQuestions}</span>
                 </div>
+                ${scenarioHtml}
                 <div class="practice-problem">
                     ${MathCore.formatNumber(problem.a, type)} ${opSymbol} ${MathCore.formatNumber(problem.b, type)}
                 </div>

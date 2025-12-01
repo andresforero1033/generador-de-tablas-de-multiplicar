@@ -304,6 +304,11 @@ class Calculator {
  * Maneja la interacción con el DOM y la navegación.
  */
 const UI = {
+    SECTION_TRANSITION_MS: 320,
+    VIEW_STATE_KEY: 'app:viewState',
+    MODULE_VIEWS: ['addition', 'subtraction', 'multiplication', 'division', 'sets'],
+    isRestoringView: false,
+
     applyButtonBounce: (button) => {
         if (!button) return;
         button.classList.remove('btn-bounce-animation');
@@ -313,6 +318,122 @@ const UI = {
         button.addEventListener('animationend', () => {
             button.classList.remove('btn-bounce-animation');
         }, { once: true });
+    },
+
+    persistViewState: (payload = {}) => {
+        if (UI.isRestoringView) return;
+
+        const moduleContext = (typeof ModuleManager !== 'undefined' && ModuleManager)
+            ? { module: ModuleManager.currentModule, tab: ModuleManager.currentTab }
+            : { module: null, tab: null };
+
+        const snapshot = {
+            type: payload.type || 'mode',
+            mode: payload.mode !== undefined ? payload.mode : state.mode,
+            module: payload.module !== undefined ? payload.module : moduleContext.module,
+            tab: payload.tab !== undefined ? payload.tab : moduleContext.tab,
+            timestamp: Date.now()
+        };
+
+        try {
+            localStorage.setItem(UI.VIEW_STATE_KEY, JSON.stringify(snapshot));
+        } catch (error) {
+            console.warn('No se pudo guardar el estado de la vista', error);
+        }
+    },
+
+    restoreViewState: () => {
+        let stored;
+        try {
+            stored = localStorage.getItem(UI.VIEW_STATE_KEY);
+        } catch (error) {
+            console.warn('No se pudo leer el estado de la vista', error);
+            return false;
+        }
+
+        if (!stored) return false;
+
+        let parsed;
+        try {
+            parsed = JSON.parse(stored);
+        } catch (error) {
+            console.warn('Estado de vista inválido', error);
+            return false;
+        }
+
+        UI.isRestoringView = true;
+        let restored = false;
+        try {
+            if (
+                parsed.type === 'module' &&
+                parsed.module &&
+                UI.MODULE_VIEWS.includes(parsed.module) &&
+                typeof ModuleManager !== 'undefined'
+            ) {
+                ModuleManager.switchModule(parsed.module);
+                if (parsed.tab) {
+                    ModuleManager.switchTab(parsed.tab);
+                }
+                restored = true;
+            } else if (parsed.mode) {
+                UI.changeMode(parsed.mode, { skipPersist: true });
+                restored = true;
+            }
+        } catch (error) {
+            console.warn('No se pudo restaurar la vista previa', error);
+            restored = false;
+        } finally {
+            UI.isRestoringView = false;
+        }
+
+        return restored;
+    },
+
+    clearViewState: () => {
+        try {
+            localStorage.removeItem(UI.VIEW_STATE_KEY);
+        } catch (error) {
+            console.warn('No se pudo limpiar el estado de la vista', error);
+        }
+    },
+
+    markSectionTransition: (element) => {
+        if (!element) return;
+        if (!element.classList.contains('section-transition')) {
+            element.classList.add('section-transition');
+        }
+        if (!element.classList.contains('u-hidden')) {
+            element.classList.add('is-visible');
+        }
+    },
+
+    registerSectionTransitions: () => {
+        const primaryContainers = [
+            DOM.containers.home,
+            DOM.containers.perfil,
+            DOM.containers.general,
+            DOM.containers.module,
+            DOM.containers.calculadora,
+            DOM.containers.aprendizaje,
+            DOM.containers.herramientas,
+            DOM.containers.temasDivision,
+            DOM.containers.temasMultiplicacion,
+            DOM.containers.temasConjuntos,
+            DOM.containers.explicacion,
+            DOM.containers.sobreNosotros,
+            DOM.containers.servicios,
+            DOM.containers.blog,
+            DOM.containers.legal,
+            DOM.containers.juegos,
+            DOM.containers.resultado,
+            DOM.containers.procesos
+        ].filter(Boolean);
+
+        primaryContainers.forEach((section) => UI.markSectionTransition(section));
+
+        document.querySelectorAll('.module-section').forEach((section) => {
+            UI.markSectionTransition(section);
+        });
     },
 
     resetScrollPosition: () => {
@@ -329,12 +450,41 @@ const UI = {
 
     toggleElement: (element, show) => {
         if (!element) return;
+        const shouldAnimate = element.classList.contains('section-transition');
+
         if (show) {
+            if (element._hideTimeout) {
+                clearTimeout(element._hideTimeout);
+                element._hideTimeout = null;
+            }
             element.classList.remove('u-hidden');
-            element.style.display = ''; // Limpiar inline style si existe
-        } else {
-            element.classList.add('u-hidden');
+            element.style.display = '';
+
+            if (!shouldAnimate) return;
+
+            const schedule = (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function')
+                ? window.requestAnimationFrame.bind(window)
+                : (cb) => setTimeout(cb, 16);
+            schedule(() => {
+                element.classList.add('is-visible');
+            });
+            return;
         }
+
+        if (!shouldAnimate || element.classList.contains('u-hidden')) {
+            element.classList.remove('is-visible');
+            element.classList.add('u-hidden');
+            return;
+        }
+
+        element.classList.remove('is-visible');
+        if (element._hideTimeout) {
+            clearTimeout(element._hideTimeout);
+        }
+        element._hideTimeout = setTimeout(() => {
+            element.classList.add('u-hidden');
+            element._hideTimeout = null;
+        }, UI.SECTION_TRANSITION_MS);
     },
 
     toggleSubmenu: (submenuId) => {
@@ -421,7 +571,7 @@ const UI = {
         if (menuMap[mode]) menuMap[mode].classList.add('active');
     },
 
-    changeMode: (mode) => {
+    changeMode: (mode, options = {}) => {
         state.mode = mode;
         UI.updateActiveMenu(mode);
 
@@ -499,6 +649,9 @@ const UI = {
                 DOM.text.titulo.textContent = 'Información Legal';
                 UI.toggleElement(DOM.containers.legal, true);
                 break;
+        }
+        if (!options.skipPersist) {
+            UI.persistViewState({ type: 'mode', mode });
         }
     },
 
@@ -953,8 +1106,12 @@ const App = {
             });
         });
         
-        // Inicializar vista
-        UI.changeMode('home');
+        UI.registerSectionTransitions();
+
+        const restored = UI.restoreViewState();
+        if (!restored) {
+            UI.changeMode('home', { skipPersist: true });
+        }
         
         // Iniciar Tour si es necesario
         if (window.tour) {
@@ -1454,6 +1611,9 @@ window.calcClear = () => Calculator.clear();
 window.logout = async () => {
     const confirmed = await window.modals.confirm('¿Estás seguro de que deseas cerrar sesión?', 'Cerrar Sesión');
     if(confirmed) {
+        if (typeof UI !== 'undefined' && typeof UI.clearViewState === 'function') {
+            UI.clearViewState();
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         localStorage.removeItem('userProfile');
